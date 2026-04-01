@@ -371,52 +371,7 @@ align-items: center;
 gap: 10px;
 }
 .card-header h3 i { color: var(--primary); }
-/* Today's Schedule - Enhanced */
-.schedule-item {
-display: grid;
-grid-template-columns: 100px 1fr 120px;
-gap: 15px;
-align-items: center;
-padding: 18px;
-background: var(--secondary);
-border-radius: 12px;
-margin-bottom: 12px;
-transition: var(--transition);
-border-left: 4px solid var(--primary);
-cursor: pointer;
-}
-.schedule-item:hover {
-transform: translateX(5px);
-box-shadow: 0 4px 15px rgba(212, 165, 181, 0.2);
-}
-.schedule-time {
-text-align: center;
-background: var(--white);
-padding: 10px;
-border-radius: 8px;
-font-weight: 700;
-color: var(--primary);
-font-size: 16px;
-}
-.schedule-date {
-font-size: 12px;
-color: var(--text-muted);
-margin-top: 4px;
-}
-.schedule-info {
-flex: 1;
-}
-.schedule-info .client-name { font-weight: 600; color: var(--text-dark); font-size: 15px; }
-.schedule-info .service { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-.schedule-info .staff { font-size: 12px; color: var(--text-light); margin-top: 4px; }
-.schedule-status {
-justify-self: end;
-padding: 6px 12px;
-border-radius: 20px;
-font-size: 12px;
-font-weight: 600;
-}
-/* Recent Clients */
+/* Cards */
 .recent-client-item {
 display: flex;
 align-items: center;
@@ -1170,8 +1125,6 @@ color: var(--primary);
 .form-row { grid-template-columns: 1fr; }
 .client-grid { grid-template-columns: 1fr; }
 .dashboard-grid { grid-template-columns: 1fr; }
-.schedule-item { grid-template-columns: 1fr; gap: 10px; }
-.schedule-status { justify-self: start; }
 }
 /* ========== RECEIPT TEMPLATE (HIDDEN) ========== */
 #receipt-template {
@@ -1289,16 +1242,6 @@ margin-bottom: 20px;
 <div class="trend up"><i class="fas fa-arrow-up"></i> Active clients</div>
 </div>
 </div>
-<div class="stat-card pink">
-<div class="stat-icon pink">
-<i class="fas fa-calendar-day"></i>
-</div>
-<div class="stat-content">
-<div class="value" id="dash-today-appointments">0</div>
-<div class="label">Today's Schedule</div>
-<div class="trend"><i class="fas fa-clock"></i> Appointments</div>
-</div>
-</div>
 <div class="stat-card green">
 <div class="stat-icon green">
 <i class="fas fa-clock"></i>
@@ -1333,18 +1276,6 @@ margin-bottom: 20px;
 <div class="dashboard-grid">
 <!-- Left Column - Main Content -->
 <div>
-<!-- Today's Schedule - Enhanced -->
-<div class="card">
-<div class="card-header">
-<h3><i class="fas fa-calendar-check"></i> Today's Schedule</h3>
-<button class="btn btn-outline btn-sm" onclick="navigateTo('appointments')">
-<i class="fas fa-external-link-alt"></i> View All
-</button>
-</div>
-<div id="today-schedule-container">
-<p style="text-align: center; color: var(--text-muted); padding: 30px;">Loading today's schedule...</p>
-</div>
-</div>
 <!-- Recent Clients - Recently Created -->
 <div class="card">
 <div class="card-header">
@@ -2188,8 +2119,6 @@ console.error("❌ Cleanup error:", error);
 function loadDashboardStats() {
 document.getElementById('dash-total-clients').textContent = allClients.length;
 const today = new Date().toISOString().split('T')[0];
-const todayAppts = allAppointments.filter(a => a.date === today);
-document.getElementById('dash-today-appointments').textContent = todayAppts.length;
 const pendingAppts = allAppointments.filter(a => a.status === 'pending');
 document.getElementById('dash-pending-appointments').textContent = pendingAppts.length;
 const now = new Date();
@@ -2202,36 +2131,9 @@ const monthlyRevenue = completedThisMonth.reduce((sum, a) => sum + (a.amount || 
 document.getElementById('dash-monthly-revenue').textContent = `₱${monthlyRevenue.toLocaleString('en-PH', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
 const totalVisits = allClients.reduce((sum, c) => sum + c.totalVisits, 0);
 document.getElementById('dash-total-visits').textContent = totalVisits;
-loadTodaySchedule(todayAppts);
 loadRecentClients();
 loadSystemHealth();
 // REMOVED: addActivity('Dashboard loaded successfully');
-}
-function loadTodaySchedule(appointments) {
-const container = document.getElementById('today-schedule-container');
-if (appointments.length === 0) {
-container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 30px;">No appointments scheduled for today</p>';
-return;
-}
-container.innerHTML = appointments.slice(0, 5).map(appt => {
-const dateObj = new Date(appt.date);
-const dateStr = dateObj.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-// Added onclick to view client detail
-return `
-<div class="schedule-item" onclick="viewClientDetail('${appt.clientId}')">
-<div class="schedule-time">
-${appt.time || '--:--'}
-<div class="schedule-date">${dateStr}</div>
-</div>
-<div class="schedule-info">
-<div class="client-name">${appt.clientName || 'Unknown'}</div>
-<div class="service">${appt.service || 'Service'}</div>
-<div class="staff"><i class="fas fa-user-nurse"></i> ${appt.staff || 'Unassigned'}</div>
-</div>
-<span class="schedule-status badge ${getStatusClass(appt.status)}">${appt.status || 'pending'}</span>
-</div>
-`;
-}).join('');
 }
 function loadRecentClients() {
 const container = document.getElementById('recent-clients-container');

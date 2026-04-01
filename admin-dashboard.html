@@ -1,0 +1,4180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard • Cath Aesthetics</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="icon" type="image/x-icon" href="image/x-icon;base64,AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+  
+  <style>
+    :root {
+      --primary: #d4a5b5;
+      --primary-light: #e8c4d0;
+      --primary-dark: #b8959e;
+      --secondary: #f5e6e8;
+      --accent: #edd4da;
+      --text-dark: #5a4a5a;
+      --text-light: #8b7d82;
+      --text-muted: #666666;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --white: #ffffff;
+      --bg-gradient: linear-gradient(135deg, #f5e6e8 0%, #edd4da 50%, #e8c4d0 100%);
+      --card-shadow: 0 4px 20px rgba(212, 165, 181, 0.15);
+      --border-radius: 16px;
+      --transition: all 0.3s ease;
+      --sidebar-width: 80px;
+      --sidebar-expanded: 280px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg-gradient);
+      min-height: 100vh;
+      color: var(--text-dark);
+      line-height: 1.6;
+      display: flex;
+    }
+    
+    /* 🔐 Loading Screen */
+    #auth-loading {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: var(--bg-gradient);
+      z-index: 9999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    
+    #auth-loading.hidden { opacity: 0; visibility: hidden; }
+    #dashboard-content { display: none; width: 100%; }
+    
+    .loader {
+      text-align: center;
+      color: var(--text-dark);
+      padding: 50px;
+      background: var(--white);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(212, 165, 181, 0.3);
+      max-width: 450px;
+      width: 90%;
+      animation: fadeIn 0.6s ease;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .loader h2 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 52px;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .spinner {
+      width: 50px; height: 50px;
+      border: 4px solid var(--secondary);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      margin: 0 auto 20px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loader p { color: var(--text-muted); font-size: 15px; }
+    
+    /* ========== AUTO-COLLAPSING SIDEBAR ========== */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--white);
+      min-height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      padding: 20px 0;
+      box-shadow: 4px 0 20px rgba(212, 165, 181, 0.1);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: width 0.2s ease;
+      overflow: hidden;
+    }
+    
+    .sidebar.expanded { width: var(--sidebar-expanded); }
+    
+    .sidebar-header {
+      padding: 0 20px 25px;
+      border-bottom: 2px solid var(--secondary);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .sidebar-brand {
+      font-family: 'Great Vibes', cursive;
+      font-size: 28px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      white-space: nowrap;
+      opacity: 0;
+      width: 0;
+      transition: opacity 0.2s ease, width 0.2s ease;
+    }
+    
+    .sidebar.expanded .sidebar-brand { opacity: 1; width: auto; }
+    
+    .toggle-sidebar {
+      background: var(--secondary);
+      border: none;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    
+    .toggle-sidebar:hover { background: var(--accent); transform: rotate(180deg); }
+    
+    .sidebar-menu { flex: 1; overflow-y: auto; padding: 15px 0; }
+    
+    .menu-category {
+      padding: 15px 20px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    
+    .sidebar.expanded .menu-category { opacity: 1; }
+    
+    .menu-item { margin: 5px 10px; }
+    
+    .menu-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 14px 20px;
+      border-radius: 12px;
+      color: var(--text-light);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    
+    .menu-link:hover { background: var(--secondary); color: var(--text-dark); }
+    .menu-link.active {
+      background: linear-gradient(135deg, var(--accent), var(--primary-light));
+      color: var(--text-dark);
+      box-shadow: 0 4px 15px rgba(212, 165, 181, 0.3);
+    }
+    
+    .menu-link i {
+      width: 20px;
+      text-align: center;
+      color: var(--primary);
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    .menu-link.active i { color: var(--text-dark); }
+    .menu-link span { opacity: 0; width: 0; transition: opacity 0.2s ease, width 0.2s ease; }
+    .sidebar.expanded .menu-link span { opacity: 1; width: auto; }
+    
+    .sidebar-footer { padding: 20px; border-top: 2px solid var(--secondary); }
+    
+    .user-info { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
+    
+    .user-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-weight: 700;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    .user-details { 
+      flex: 1; 
+      overflow: hidden; 
+      opacity: 0; 
+      width: 0; 
+      transition: opacity 0.2s ease, width 0.2s ease; 
+    }
+    .sidebar.expanded .user-details { opacity: 1; width: auto; }
+    
+    .user-email {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .role-badge {
+      background: linear-gradient(135deg, #d4edda, #c3e6cb);
+      color: #155724;
+      padding: 4px 10px;
+      border-radius: 15px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .logout-btn {
+      width: 100%;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: var(--white);
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    
+    .logout-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4); }
+    .logout-btn span { opacity: 0; width: 0; transition: opacity 0.2s ease, width 0.2s ease; }
+    .sidebar.expanded .logout-btn span { opacity: 1; width: auto; }
+    
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 30px;
+      min-height: 100vh;
+      transition: margin-left 0.2s ease;
+    }
+    
+    .page-header {
+      margin-bottom: 30px;
+      animation: fadeIn 0.6s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      color: var(--text-dark);
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .page-header h1 i { color: var(--primary); }
+    .page-header p { color: var(--text-muted); font-size: 15px; }
+    
+    /* Page Sections */
+    .page-section { display: none; }
+    .page-section.active { display: block; animation: fadeIn 0.5s ease; }
+    
+    /* ========== DASHBOARD LAYOUT ========== */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2.5fr 1fr;
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    
+    @media (max-width: 1200px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+    
+    /* Stats Cards */
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      box-shadow: var(--card-shadow);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      transition: var(--transition);
+      border: 1px solid rgba(237, 212, 218, 0.5);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 4px;
+    }
+    
+    .stat-card.blue::before { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+    .stat-card.green::before { background: linear-gradient(90deg, #10b981, #34d399); }
+    .stat-card.purple::before { background: linear-gradient(90deg, #8b5cf6, #a78bfa); }
+    .stat-card.pink::before { background: linear-gradient(90deg, var(--primary), var(--primary-light)); }
+    .stat-card.orange::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(212, 165, 181, 0.25);
+    }
+    
+    .stat-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .stat-icon.blue { background: linear-gradient(135deg, #3b82f6, #60a5fa); color: white; }
+    .stat-icon.green { background: linear-gradient(135deg, #10b981, #34d399); color: white; }
+    .stat-icon.purple { background: linear-gradient(135deg, #8b5cf6, #a78bfa); color: white; }
+    .stat-icon.pink { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: white; }
+    .stat-icon.orange { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: white; }
+    
+    .stat-content { flex: 1; }
+    .stat-content .value { font-size: 28px; font-weight: 700; color: var(--text-dark); }
+    .stat-content .label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .stat-content .trend { font-size: 12px; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+    .stat-content .trend.up { color: var(--success); }
+    .stat-content .trend.down { color: var(--danger); }
+    
+    /* Cards */
+    .card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      margin-bottom: 25px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(237, 212, 218, 0.5);
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--secondary);
+    }
+    
+    .card-header h3 {
+      color: var(--text-dark);
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-header h3 i { color: var(--primary); }
+    
+    /* Today's Schedule - Enhanced */
+    .schedule-item {
+      display: grid;
+      grid-template-columns: 100px 1fr 120px;
+      gap: 15px;
+      align-items: center;
+      padding: 18px;
+      background: var(--secondary);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: var(--transition);
+      border-left: 4px solid var(--primary);
+    }
+    
+    .schedule-item:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(212, 165, 181, 0.2);
+    }
+    
+    .schedule-time {
+      text-align: center;
+      background: var(--white);
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 16px;
+    }
+    
+    .schedule-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    .schedule-info {
+      flex: 1;
+    }
+    .schedule-info .client-name { font-weight: 600; color: var(--text-dark); font-size: 15px; }
+    .schedule-info .service { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .schedule-info .staff { font-size: 12px; color: var(--text-light); margin-top: 4px; }
+    
+    .schedule-status {
+      justify-self: end;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    /* Recent Clients */
+    .recent-client-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      transition: var(--transition);
+      cursor: pointer;
+    }
+    
+    .recent-client-item:hover {
+      background: var(--secondary);
+    }
+    
+    .recent-client-avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-weight: 700;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    
+    .recent-client-info { flex: 1; }
+    .recent-client-info .name { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+    .recent-client-info .joined { font-size: 12px; color: var(--text-muted); }
+    
+    /* Messages/Notifications */
+    .message-item {
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: var(--secondary);
+      border-left: 4px solid var(--info);
+      transition: var(--transition);
+    }
+    
+    .message-item:hover {
+      transform: translateX(5px);
+    }
+    
+    .message-item.urgent { border-left-color: var(--danger); }
+    .message-item.success { border-left-color: var(--success); }
+    
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    .message-title { font-weight: 600; color: var(--text-dark); font-size: 14px; }
+    .message-time { font-size: 12px; color: var(--text-muted); }
+    .message-body { font-size: 13px; color: var(--text-light); line-height: 1.5; }
+    
+    /* Activity Timeline - Limited to 3 */
+    .activity-timeline {
+      position: relative;
+      padding-left: 30px;
+    }
+    
+    .activity-timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--secondary);
+    }
+    
+    .activity-item {
+      position: relative;
+      padding-bottom: 20px;
+    }
+    
+    .activity-item::before {
+      content: '';
+      position: absolute;
+      left: -24px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 2px solid var(--white);
+    }
+    
+    .activity-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 5px;
+    }
+    
+    .activity-content {
+      font-size: 14px;
+      color: var(--text-dark);
+    }
+    
+    /* Client Profiles Page */
+    .client-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .overview-card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+      border: 1px solid rgba(237, 212, 218, 0.5);
+      transition: var(--transition);
+    }
+    
+    .overview-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(212, 165, 181, 0.2);
+    }
+    
+    .overview-card .icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 15px;
+      font-size: 20px;
+    }
+    
+    .overview-card .icon.blue { background: #dbeafe; color: #3b82f6; }
+    .overview-card .icon.green { background: #d1fae5; color: #10b981; }
+    .overview-card .icon.pink { background: #fce7f3; color: #ec4899; }
+    .overview-card .icon.orange { background: #ffedd5; color: #f59e0b; }
+    
+    .overview-card .value { font-size: 32px; font-weight: 700; color: var(--text-dark); margin-bottom: 5px; }
+    .overview-card .label { font-size: 13px; color: var(--text-muted); }
+    
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      background: var(--white);
+      padding: 20px;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+    }
+    
+    .search-filter-group {
+      display: flex;
+      gap: 15px;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      position: relative;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 14px 20px 14px 50px;
+      border: 2px solid var(--secondary);
+      border-radius: 12px;
+      font-size: 14px;
+      transition: var(--transition);
+      font-family: 'Poppins', sans-serif;
+      background: #faf8f9;
+    }
+    
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--white);
+      box-shadow: 0 0 0 4px rgba(212, 165, 181, 0.15);
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 16px;
+    }
+    
+    .filter-select {
+      min-width: 180px;
+      padding: 14px 18px;
+      border: 2px solid var(--secondary);
+      border-radius: 12px;
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+      background: #faf8f9;
+      cursor: pointer;
+    }
+    
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .client-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+    }
+    
+    .client-card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid rgba(237, 212, 218, 0.5);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .client-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    }
+    
+    .client-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(212, 165, 181, 0.25);
+    }
+    
+    .client-card-header {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .client-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
+      font-weight: 700;
+      font-size: 24px;
+      flex-shrink: 0;
+    }
+    
+    .client-info { flex: 1; overflow: hidden; }
+    .client-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .client-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .client-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .client-stat {
+      text-align: center;
+      padding: 12px;
+      background: var(--secondary);
+      border-radius: 10px;
+    }
+    
+    .client-stat .value {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .client-stat .label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    
+    .client-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    
+    .client-actions .btn {
+      flex: 1;
+      justify-content: center;
+    }
+    
+    /* Table */
+    .table-container { overflow-x: auto; border-radius: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 14px 18px; text-align: left; border-bottom: 1px solid var(--secondary); }
+    th {
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    tr { transition: var(--transition); }
+    tr:hover { background: linear-gradient(135deg, #fff5f7, #f5e6e8); }
+    
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--primary-light));
+      color: var(--text-dark);
+      box-shadow: 0 4px 15px rgba(212, 165, 181, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212, 165, 181, 0.5); }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #f87171, #ef4444);
+      color: var(--white);
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5); }
+    
+    .btn-success {
+      background: linear-gradient(135deg, #34d399, #10b981);
+      color: var(--white);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    .btn-info {
+      background: linear-gradient(135deg, #67e8f9, #22d3ee);
+      color: var(--white);
+      box-shadow: 0 4px 15px rgba(34, 211, 238, 0.3);
+    }
+    
+    .btn-warning {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      color: var(--white);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+    
+    .btn-sm { padding: 8px 16px; font-size: 12px; }
+    .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--text-dark); }
+    .btn-outline:hover { background: var(--secondary); }
+    .btn-icon { padding: 10px 14px; border-radius: 10px; }
+    .btn-lg { padding: 16px 32px; font-size: 16px; }
+    
+    /* Badge */
+    .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-success { background: #d4edda; color: #155724; }
+    .badge-warning { background: #fff3cd; color: #856404; }
+    .badge-info { background: #d1ecf1; color: #0c5460; }
+    .badge-danger { background: #f8d7da; color: #721c24; }
+    
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(184, 149, 158, 0.8);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 30px;
+      opacity: 0;
+      visibility: hidden;
+      transition: var(--transition);
+    }
+    
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal-overlay.hidden { display: none; }
+    
+    .modal-content {
+      background: var(--white);
+      border-radius: 24px;
+      padding: 40px;
+      width: 100%;
+      max-width: 1100px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      transform: scale(0.9);
+      opacity: 0;
+      transition: var(--transition);
+      box-shadow: 0 25px 80px rgba(212, 165, 181, 0.4);
+    }
+    
+    .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--secondary);
+    }
+    
+    .modal-header h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 24px;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .modal-header h3 i { color: var(--primary); }
+    
+    .modal-close {
+      background: var(--secondary);
+      border: none;
+      font-size: 20px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: var(--transition);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-close:hover { color: var(--primary); background: var(--accent); transform: rotate(90deg); }
+    
+    /* Form Styles */
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-group label i { color: var(--primary); font-size: 12px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%;
+      padding: 14px 18px;
+      border: 2px solid var(--secondary);
+      border-radius: 12px;
+      font-size: 14px;
+      transition: var(--transition);
+      font-family: 'Poppins', sans-serif;
+      background: #faf8f9;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--white);
+      box-shadow: 0 0 0 4px rgba(212, 165, 181, 0.15);
+    }
+    .form-group textarea { min-height: 90px; resize: vertical; }
+    
+    /* Empty State */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+    .empty-state i { font-size: 80px; margin-bottom: 20px; opacity: 0.3; }
+    .empty-state p { font-size: 16px; margin-bottom: 20px; }
+
+    /* ========== APPOINTMENT STYLES ========== */
+    .appointment-date-tab {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      border-bottom: 3px solid transparent;
+    }
+
+    .appointment-date-tab:hover {
+      background: var(--secondary);
+      color: var(--text-dark);
+    }
+
+    .appointment-date-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: linear-gradient(135deg, rgba(212, 165, 181, 0.1), transparent);
+    }
+
+    .appointment-card {
+      background: linear-gradient(135deg, var(--white), #faf8f9);
+      border-radius: 12px;
+      padding: 18px;
+      margin-bottom: 15px;
+      border-left: 4px solid var(--primary);
+      transition: var(--transition);
+      display: grid;
+      grid-template-columns: 120px 1fr 150px auto;
+      gap: 20px;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(212, 165, 181, 0.08);
+    }
+
+    .appointment-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(212, 165, 181, 0.15);
+      border-left-color: var(--primary-dark);
+    }
+
+    .appointment-time-box {
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      color: var(--white);
+      padding: 15px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .appointment-time-box .time {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .appointment-time-box .date {
+      font-size: 11px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    .appointment-details {
+      flex: 1;
+    }
+
+    .appointment-client-name {
+      font-weight: 700;
+      color: var(--text-dark);
+      font-size: 16px;
+      margin-bottom: 6px;
+    }
+
+    .appointment-service {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+
+    .appointment-staff {
+      font-size: 12px;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .appointment-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: right;
+    }
+
+    .appointment-duration {
+      font-size: 12px;
+      color: var(--text-muted);
+      background: var(--secondary);
+      padding: 6px 12px;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .appointment-status {
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .appointment-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .appointment-empty {
+      text-align: center;
+      padding: 60px 40px;
+      color: var(--text-muted);
+    }
+
+    .appointment-empty i {
+      font-size: 60px;
+      opacity: 0.2;
+      margin-bottom: 15px;
+      display: block;
+    }
+
+    .appointment-empty p {
+      font-size: 15px;
+      margin: 10px 0;
+    }
+    
+    /* Responsive for appointment cards */
+    @media (max-width: 1024px) {
+      .appointment-card {
+        grid-template-columns: 100px 1fr;
+        gap: 15px;
+      }
+      .appointment-meta { text-align: left; }
+    }
+
+    @media (max-width: 768px) {
+      .appointment-card {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .appointment-time-box { padding: 12px; font-size: 16px; }
+      .appointment-actions { flex-wrap: wrap; }
+      .appointment-meta { text-align: left; }
+    }
+
+    /* ========== SERVICE CARD STYLES ========== */
+    .service-card {
+      background: var(--white);
+      border-radius: var(--border-radius);
+      padding: 25px;
+      box-shadow: var(--card-shadow);
+      border-left: 5px solid var(--primary);
+      transition: var(--transition);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .service-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    }
+
+    .service-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 35px rgba(212, 165, 181, 0.25);
+    }
+
+    .service-header {
+      border-bottom: 2px solid var(--secondary);
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
+    .service-category-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--primary-light));
+      color: var(--text-dark);
+    }
+
+    .service-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-bottom: 8px;
+    }
+
+    .service-description {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 15px;
+    }
+
+    .service-pricing {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--secondary), var(--accent));
+      border-radius: 12px;
+    }
+
+    .price-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price-label {
+      font-size: 11px;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .price-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #000;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .price-value .currency {
+      font-size: 16px;
+    }
+
+    .price-value .period {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .service-package-info {
+      background: linear-gradient(135deg, #dbeafe 0%, #e0f2fe 100%);
+      border: 1px solid #7dd3fc;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #0369a1;
+    }
+
+    .service-package-info i {
+      font-size: 20px;
+      color: #0ea5e9;
+    }
+
+    .service-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .service-actions .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .service-stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .service-stat i {
+      color: var(--primary);
+    }
+
+
+    
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .client-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    }
+    
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .page-header h1 { font-size: 28px; }
+      .dashboard-stats, .client-overview { grid-template-columns: 1fr; }
+      .action-bar { flex-direction: column; }
+      .search-box { min-width: 100%; }
+      .form-row { grid-template-columns: 1fr; }
+      .client-grid { grid-template-columns: 1fr; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .schedule-item { grid-template-columns: 1fr; gap: 10px; }
+      .schedule-status { justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔐 Loading Screen -->
+  <div id="auth-loading">
+    <div class="loader">
+      <h2><i class="fas fa-spa"></i> Cath Aesthetics</h2>
+      <div class="spinner"></div>
+      <p id="loading-text">🔐 Verifying admin access...</p>
+    </div>
+  </div>
+
+  <!-- 🔐 Dashboard Content -->
+  <div id="dashboard-content">
+    
+    <!-- ========== AUTO-COLLAPSING SIDEBAR ========== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">Cath Aesthetics</div>
+        <button class="toggle-sidebar" id="toggle-sidebar" title="Toggle Sidebar">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+      
+      <nav class="sidebar-menu">
+        <div class="menu-category">Main</div>
+        <div class="menu-item">
+          <a class="menu-link active" data-page="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+        
+        <div class="menu-category">Management</div>
+        <div class="menu-item">
+          <a class="menu-link" data-page="clients">
+            <i class="fas fa-users"></i>
+            <span>Client Profiles</span>
+          </a>
+        </div>
+        <div class="menu-item">
+          <a class="menu-link" data-page="appointments">
+            <i class="fas fa-calendar-alt"></i>
+            <span>Appointments</span>
+          </a>
+        </div>
+        <div class="menu-item">
+          <a class="menu-link" data-page="services">
+            <i class="fas fa-spa"></i>
+            <span>Services & Packages</span>
+          </a>
+        </div>
+        
+        <div class="menu-category">Settings</div>
+        <div class="menu-item">
+          <a class="menu-link" data-page="settings">
+            <i class="fas fa-cog"></i>
+            <span>Settings</span>
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar" id="user-avatar">A</div>
+          <div class="user-details">
+            <div class="user-email" id="user-email">Loading...</div>
+            <div class="role-badge">
+              <i class="fas fa-crown"></i>
+              <span>Administrator</span>
+            </div>
+          </div>
+        </div>
+        <button class="logout-btn" id="logout-btn">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="main-content">
+      
+      <!-- ========== DASHBOARD HOME PAGE ========== -->
+      <section id="dashboard-page" class="page-section active">
+        <div class="page-header">
+          <div>
+            <h1><i class="fas fa-chart-line"></i> Dashboard Overview</h1>
+            <p id="welcome-message">Welcome back! Here's what's happening at your clinic today.</p>
+          </div>
+        </div>
+
+        <!-- Key Statistics -->
+        <div class="dashboard-stats">
+          <div class="stat-card blue">
+            <div class="stat-icon blue">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="dash-total-clients">0</div>
+              <div class="label">Total Clients</div>
+              <div class="trend up"><i class="fas fa-arrow-up"></i> Active clients</div>
+            </div>
+          </div>
+          
+          <div class="stat-card pink">
+            <div class="stat-icon pink">
+              <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="dash-today-appointments">0</div>
+              <div class="label">Today's Schedule</div>
+              <div class="trend"><i class="fas fa-clock"></i> Appointments</div>
+            </div>
+          </div>
+          
+          <div class="stat-card green">
+            <div class="stat-icon green">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="dash-pending-appointments">0</div>
+              <div class="label">Pending</div>
+              <div class="trend down"><i class="fas fa-exclamation-circle"></i> Needs action</div>
+            </div>
+          </div>
+          
+          <div class="stat-card purple">
+            <div class="stat-icon purple">
+              <i class="fas fa-peso-sign"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="dash-monthly-revenue">₱0</div>
+              <div class="label">This Month</div>
+              <div class="trend up"><i class="fas fa-arrow-up"></i> Revenue</div>
+            </div>
+          </div>
+          
+          <div class="stat-card orange">
+            <div class="stat-icon orange">
+              <i class="fas fa-star"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="dash-total-visits">0</div>
+              <div class="label">Total Visits</div>
+              <div class="trend"><i class="fas fa-chart-line"></i> All time</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <!-- Left Column - Main Content -->
+          <div>
+            <!-- Today's Schedule - Enhanced -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fas fa-calendar-check"></i> Today's Schedule</h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateTo('appointments')">
+                  <i class="fas fa-external-link-alt"></i> View All
+                </button>
+              </div>
+              <div id="today-schedule-container">
+                <p style="text-align: center; color: var(--text-muted); padding: 30px;">Loading today's schedule...</p>
+              </div>
+            </div>
+
+            <!-- Recent Clients - Recently Created -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fas fa-user-plus"></i> Recently Joined</h3>
+                <button class="btn btn-outline btn-sm" onclick="navigateTo('clients')">
+                  <i class="fas fa-external-link-alt"></i> View All
+                </button>
+              </div>
+              <div id="recent-clients-container">
+                <p style="text-align: center; color: var(--text-muted); padding: 30px;">Loading recent clients...</p>
+              </div>
+            </div>
+
+            <!-- System Health & Smart Alerts -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fas fa-heartbeat" style="color:#10b981;"></i> System Health</h3>
+              </div>
+              <div id="system-health-container" style="display:grid;gap:10px;margin-top:15px;">
+                <!-- Auto-populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column - Sidebar Widgets -->
+          <div>
+            <!-- Messages & Notifications -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fas fa-envelope"></i> Messages</h3>
+                <span class="badge badge-info" id="message-count">0</span>
+              </div>
+              <div id="messages-container">
+                <div class="message-item">
+                  <div class="message-header">
+                    <div class="message-title"><i class="fas fa-info-circle"></i> System Notification</div>
+                    <div class="message-time">Just now</div>
+                  </div>
+                  <div class="message-body">Welcome to Cath Aesthetics! Your dashboard is ready.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity - Limited to 3 -->
+            <div class="card">
+              <div class="card-header">
+                <h3><i class="fas fa-history"></i> Recent Activity</h3>
+              </div>
+              <div class="activity-timeline" id="activity-timeline">
+                <div class="activity-item">
+                  <div class="activity-time">Just now</div>
+                  <div class="activity-content">Dashboard loaded</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== CLIENT PROFILES PAGE ========== -->
+      <section id="clients-page" class="page-section">
+        <div class="page-header">
+          <div>
+            <h1><i class="fas fa-users"></i> Client Profiles</h1>
+            <p>Manage and view all your clients</p>
+          </div>
+        </div>
+
+        <!-- Client Overview Stats -->
+        <div class="client-overview">
+          <div class="overview-card">
+            <div class="icon blue">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="value" id="overview-total-clients">0</div>
+            <div class="label">Total Clients</div>
+          </div>
+          
+          <div class="overview-card">
+            <div class="icon green">
+              <i class="fas fa-user-check"></i>
+            </div>
+            <div class="value" id="overview-active-clients">0</div>
+            <div class="label">Active Clients</div>
+          </div>
+          
+          <div class="overview-card">
+            <div class="icon pink">
+              <i class="fas fa-calendar-check"></i>
+            </div>
+            <div class="value" id="overview-total-visits">0</div>
+            <div class="label">Total Visits</div>
+          </div>
+          
+          <div class="overview-card">
+            <div class="icon orange">
+              <i class="fas fa-peso-sign"></i>
+            </div>
+            <div class="value" id="overview-total-revenue">₱0</div>
+            <div class="label">Total Revenue</div>
+          </div>
+        </div>
+
+        <!-- Search & Filter Bar -->
+        <div class="action-bar">
+          <div class="search-filter-group">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input type="text" id="client-search" placeholder="Search clients by name or contact...">
+            </div>
+            <select class="filter-select" id="client-filter">
+              <option value="newest">Newest Clients</option>
+              <option value="oldest">Oldest Clients</option>
+              <option value="most-visits">Most Visits</option>
+              <option value="most-spent">Most Spent</option>
+              <option value="least-visits">Least Visits</option>
+              <option value="least-spent">Least Spent</option>
+            </select>
+          </div>
+          <div class="action-buttons">
+            <button class="btn btn-primary" onclick="openAddClientModal()">
+              <i class="fas fa-user-plus"></i> Add Client
+            </button>
+          </div>
+        </div>
+
+        <!-- Client Grid -->
+        <div class="client-grid" id="client-grid">
+          <div class="empty-state">
+            <i class="fas fa-users"></i>
+            <p>Loading clients...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== APPOINTMENTS PAGE ========== -->
+      <section id="appointments-page" class="page-section">
+        <div class="page-header">
+          <div>
+            <h1><i class="fas fa-calendar-alt"></i> Appointments</h1>
+            <p>Schedule and manage client appointments</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddAppointmentModal()">
+            <i class="fas fa-plus-circle"></i> New Appointment
+          </button>
+        </div>
+
+        <!-- Appointment Stats Cards -->
+        <div class="dashboard-stats">
+          <div class="stat-card blue">
+            <div class="stat-icon blue">
+              <i class="fas fa-calendar-day"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="appt-today-count">0</div>
+              <div class="label">Today</div>
+              <div class="trend"><i class="fas fa-clock"></i> Appointments</div>
+            </div>
+          </div>
+          
+          <div class="stat-card green">
+            <div class="stat-icon green">
+              <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="appt-completed-count">0</div>
+              <div class="label">Completed</div>
+              <div class="trend"><i class="fas fa-checkmark"></i> This month</div>
+            </div>
+          </div>
+          
+          <div class="stat-card orange">
+            <div class="stat-icon orange">
+              <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="appt-pending-count">0</div>
+              <div class="label">Pending</div>
+              <div class="trend"><i class="fas fa-exclamation-circle"></i> Awaiting confirmation</div>
+            </div>
+          </div>
+          
+          <div class="stat-card pink">
+            <div class="stat-icon pink">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-content">
+              <div class="value" id="appt-total-count">0</div>
+              <div class="label">Total</div>
+              <div class="trend"><i class="fas fa-list"></i> All time</div>
+            </div>
+          </div>
+        </div>
+
+
+
+        <!-- All Appointments with Filtering -->
+        <div class="card">
+          <div class="card-header">
+            <h3><i class="fas fa-check-square"></i> All Appointments</h3>
+            <span id="appointments-total-count" style="font-size:14px;color:var(--text-muted);">(0)</span>
+          </div>
+
+          <!-- Filter Bar -->
+          <div class="action-bar" style="margin-bottom:20px;padding:15px;">
+            <div class="search-filter-group">
+              <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="appointment-search" placeholder="Search by client name...">
+              </div>
+              <select class="filter-select" id="appointment-status-filter" onchange="filterAppointmentsByStatus()">
+                <option value="">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select class="filter-select" id="appointment-date-sort" onchange="sortAppointments()">
+                <option value="newest">New to Old</option>
+                <option value="oldest">Old to New</option>
+                <option value="soonest">Soonest</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Appointments Table -->
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Client</th>
+                  <th>Service</th>
+                  <th>Duration</th>
+                  <th>Staff</th>
+                  <th>Status</th>
+                  <th>Notes</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="appointments-table-body">
+                <tr><td colspan="9" style="text-align:center;padding:30px;">⏳ Loading appointments...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination Controls -->
+          <div style="display:flex;justify-content:center;align-items:center;gap:15px;margin-top:25px;padding:15px;border-top:1px solid var(--secondary);">
+            <button class="btn btn-outline btn-sm" id="appt-prev-btn" onclick="appointmentPrevPage()" style="min-width:80px;">
+              <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <div style="display:flex;gap:8px;" id="appt-page-buttons"></div>
+            <button class="btn btn-outline btn-sm" id="appt-next-btn" onclick="appointmentNextPage()" style="min-width:80px;">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+            <span id="appt-page-info" style="color:var(--text-muted);font-size:13px;min-width:150px;text-align:center;">Page 1</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SERVICES & PACKAGES PAGE ========== -->
+      <section id="services-page" class="page-section">
+        <div class="page-header">
+          <div>
+            <h1><i class="fas fa-spa"></i> Services & Packages</h1>
+            <p>Manage aesthetic services and treatment packages</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddServiceModal()">
+            <i class="fas fa-plus-circle"></i> Add Service
+          </button>
+        </div>
+
+        <!-- Service Categories Tabs -->
+        <div style="display:flex;gap:10px;margin-bottom:25px;border-bottom:2px solid var(--secondary);overflow-x:auto;padding-bottom:15px;">
+          <button class="appointment-date-tab active" data-service="all" onclick="filterServicesByCategory('all')">
+            <i class="fas fa-th-list"></i> All Services
+          </button>
+          <button class="appointment-date-tab" data-service="diode" onclick="filterServicesByCategory('diode')">
+            <i class="fas fa-laser"></i> Diode Laser
+          </button>
+          <button class="appointment-date-tab" data-service="emsculpt" onclick="filterServicesByCategory('emsculpt')">
+            <i class="fas fa-dumbbell"></i> EmSculpt
+          </button>
+          <button class="appointment-date-tab" data-service="aurelift" onclick="filterServicesByCategory('aurelift')">
+            <i class="fas fa-sparkles"></i> AureLift
+          </button>
+        </div>
+
+        <!-- Services Grid -->
+        <div id="services-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(350px, 1fr));gap:25px;">
+          <div class="empty-state" style="grid-column:1/-1;">
+            <i class="fas fa-spa"></i>
+            <p>Loading services...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SETTINGS PAGE ========== -->
+      <section id="settings-page" class="page-section">
+        <div class="page-header">
+          <h1><i class="fas fa-cog"></i> Settings</h1>
+          <p>Manage your account and preferences</p>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-user-circle"></i> Account Settings</h3>
+          <p style="color:var(--text-muted);margin-bottom:20px;">Manage your admin account settings</p>
+          <div class="user-info" style="margin-bottom:20px;">
+            <div class="user-avatar" style="width:60px;height:60px;font-size:24px;" id="settings-avatar">A</div>
+            <div>
+              <div style="font-weight:600;font-size:18px;" id="settings-email">Loading...</div>
+              <div class="role-badge" style="margin-top:5px;">
+                <i class="fas fa-crown"></i> Administrator
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-outline" onclick="window.location.replace('login.html')">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+
+        <div class="card">
+          <h3><i class="fas fa-info-circle"></i> System Information</h3>
+          <div style="display:grid;gap:15px;">
+            <div style="display:flex;justify-content:space-between;padding:15px;background:var(--secondary);border-radius:10px;">
+              <span style="font-weight:600;">Clinic Name</span>
+              <span>Cath Aesthetics</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:15px;background:var(--secondary);border-radius:10px;">
+              <span style="font-weight:600;">Location</span>
+              <span>Lucena City, Quezon</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:15px;background:var(--secondary);border-radius:10px;">
+              <span style="font-weight:600;">System Version</span>
+              <span>v2.2.0 • Enhanced Appointments</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Principles & Best Practices -->
+        <div class="card">
+          <div class="card-header" style="border-bottom: 2px solid var(--secondary);">
+            <h3><i class="fas fa-shield-alt" style="color:#10b981;"></i> System Principles</h3>
+            <span style="font-size:12px;color:var(--text-muted);background:var(--secondary);padding:6px 12px;border-radius:20px;">Best Practices</span>
+          </div>
+          <div style="display:grid;gap:12px;margin-top:15px;">
+            <div style="padding:15px;background:linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%);border-radius:10px;border-left:4px solid #10b981;">
+              <div style="font-weight:600;color:#065f46;margin-bottom:5px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-check-circle"></i> Data Validation
+              </div>
+              <p style="font-size:13px;color:#047857;margin:0;">Always validate appointment data before saving. Check for overlapping appointments and past dates.</p>
+            </div>
+            <div style="padding:15px;background:linear-gradient(135deg, #bfdbfe 0%, #eff6ff 100%);border-radius:10px;border-left:4px solid #3b82f6;">
+              <div style="font-weight:600;color:#1e40af;margin-bottom:5px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-link"></i> Cascade Operations
+              </div>
+              <p style="font-size:13px;color:#1e3a8a;margin:0;">When deleting clients, automatically remove their appointments to maintain data integrity.</p>
+            </div>
+            <div style="padding:15px;background:linear-gradient(135deg, #ddd6fe 0%, #f3f0ff 100%);border-radius:10px;border-left:4px solid #8b5cf6;">
+              <div style="font-weight:600;color:#5b21b6;margin-bottom:5px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-tasks"></i> Status Tracking
+              </div>
+              <p style="font-size:13px;color:#6d28d9;margin:0;">Keep appointment status updated: Pending → Confirmed → Completed → Archived for accurate reports.</p>
+            </div>
+            <div style="padding:15px;background:linear-gradient(135deg, #fecaca 0%, #fee2e2 100%);border-radius:10px;border-left:4px solid #ef4444;">
+              <div style="font-weight:600;color:#7f1d1d;margin-bottom:5px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-exclamation-triangle"></i> Double-Booking Prevention
+              </div>
+              <p style="font-size:13px;color:#991b1b;margin:0;">Prevent same staff member from having overlapping appointments. Check time conflicts before confirming.</p>
+            </div>
+            <div style="padding:15px;background:linear-gradient(135deg, #fed7aa 0%, #fef3c7 100%);border-radius:10px;border-left:4px solid #f59e0b;">
+              <div style="font-weight:600;color:#92400e;margin-bottom:5px;display:flex;align-items:center;gap:8px;">
+                <i class="fas fa-lock"></i> Archive Old Records
+              </div>
+              <p style="font-size:13px;color:#b45309;margin:0;">Archive completed appointments instead of deleting. Maintain audit trail for compliance and analytics.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upcoming Features Roadmap -->
+        <div class="card">
+          <div class="card-header" style="border-bottom: 2px solid var(--secondary);">
+            <h3><i class="fas fa-rocket" style="color:#d4a5b5;"></i> Upcoming Features (Roadmap)</h3>
+            <span style="font-size:12px;color:var(--text-muted);background:var(--secondary);padding:6px 12px;border-radius:20px;">Coming Soon</span>
+          </div>
+          <div style="display:grid;gap:12px;margin-top:15px;">
+            <div style="padding:15px;background:var(--secondary);border-radius:10px;border-left:4px solid var(--primary);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                  <i class="fas fa-bell"></i> Automated Reminders
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin:0;">SMS/Email reminders 24h and 2h before appointments</p>
+              </div>
+              <span style="background:#fbbf24;color:#92400e;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;">Q2 2026</span>
+            </div>
+            <div style="padding:15px;background:var(--secondary);border-radius:10px;border-left:4px solid var(--primary);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                  <i class="fas fa-calendar-check"></i> Staff Availability
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin:0;">Define working hours, days off, and holidays per staff member</p>
+              </div>
+              <span style="background:#34d399;color:#065f46;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;">Q2 2026</span>
+            </div>
+            <div style="padding:15px;background:var(--secondary);border-radius:10px;border-left:4px solid var(--primary);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                  <i class="fas fa-redo-alt"></i> Recurring Appointments
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin:0;">Weekly/monthly treatments and multi-session packages</p>
+              </div>
+              <span style="background:#60a5fa;color:#1e40af;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;">Q3 2026</span>
+            </div>
+            <div style="padding:15px;background:var(--secondary);border-radius:10px;border-left:4px solid var(--primary);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                  <i class="fas fa-credit-card"></i> Payment Tracking
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin:0;">Record payment methods and calculate revenue per staff/service</p>
+              </div>
+              <span style="background:#a78bfa;color:#5b21b6;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;">Q2 2026</span>
+            </div>
+            <div style="padding:15px;background:var(--secondary);border-radius:10px;border-left:4px solid var(--primary);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                  <i class="fas fa-chart-bar"></i> Advanced Analytics
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin:0;">Revenue reports, peak times, no-show rates, staff productivity</p>
+              </div>
+              <span style="background:#f87171;color:#7f1d1d;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;">Q3 2026</span>
+            </div>
+            <div style="padding:15px;background:var(--secondary);border-radius:10px;border-left:4px solid var(--primary);display:flex;justify-content:space-between;align-items:center;">
+              <div>
+                <div style="font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+                  <i class="fas fa-shopping-cart"></i> Resource Management
+                </div>
+                <p style="font-size:13px;color:var(--text-muted);margin:0;">Track supplies used per appointment and auto-generate orders</p>
+              </div>
+              <span style="background:#fb923c;color:#7c2d12;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;">Q3 2026</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========== ADD CLIENT MODAL ========== -->
+  <div id="add-client-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-plus"></i> Add New Client</h3>
+        <button class="modal-close" id="close-add-client-modal">&times;</button>
+      </div>
+      
+      <form id="add-client-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-asterisk"></i> Full Name *</label>
+            <input type="text" id="new-client-name" placeholder="e.g., Maria Santos" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-asterisk"></i> Contact Number *</label>
+            <input type="tel" id="new-client-contact" placeholder="+63 912 345 6789" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-calendar"></i> Birth Date</label>
+            <input type="date" id="new-client-birthdate">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-heartbeat"></i> Medical History</label>
+            <input type="text" id="new-client-medical" placeholder="e.g., Allergic to penicillin">
+          </div>
+        </div>
+        
+        <div style="display:flex;gap:15px;justify-content:flex-end;margin-top:25px;">
+          <button type="button" class="btn btn-outline" onclick="closeAddClientModal()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save Client
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== ADD SERVICE MODAL ========== -->
+  <div id="add-service-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width:800px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-spa"></i> Add Service & Package</h3>
+        <button class="modal-close" id="close-add-service-modal">&times;</button>
+      </div>
+      
+      <form id="add-service-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-asterisk"></i> Service Category *</label>
+            <select id="service-category" required onchange="updateServiceCategoryInfo()">
+              <option value="">Select Category...</option>
+              <option value="diode">Diode Laser - Hair Removal</option>
+              <option value="emsculpt">EmSculpt - Muscle Sculpting</option>
+              <option value="aurelift">AureLift - Face & Body Contouring</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-asterisk"></i> Service Name *</label>
+            <input type="text" id="service-name" placeholder="e.g., Upper Lip & Lower Lip" required>
+          </div>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-money-bill-alt"></i> Per Session Price *</label>
+            <input type="number" id="service-price" placeholder="588" required min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-tag"></i> Package Sessions *</label>
+            <input type="number" id="service-package-sessions" placeholder="5" required min="1" step="1" value="5">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-money-bill-alt"></i> Package Price *</label>
+            <input type="number" id="service-package-price" placeholder="2888" required min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-gift"></i> Free Sessions</label>
+            <input type="number" id="service-free-sessions" placeholder="1" value="1" min="0" step="1">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label><i class="fas fa-sticky-note"></i> Description</label>
+          <textarea id="service-description" placeholder="Description of this service..."></textarea>
+        </div>
+
+        <div style="display:flex;gap:15px;justify-content:flex-end;margin-top:25px;">
+          <button type="button" class="btn btn-outline" onclick="closeAddServiceModal()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save Service
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== ADD APPOINTMENT MODAL ========== -->
+  <div id="add-appointment-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fas fa-calendar-plus"></i> New Appointment</h3>
+        <button class="modal-close" id="close-add-appointment-modal">&times;</button>
+      </div>
+      
+      <form id="add-appointment-form-modal">
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-asterisk"></i> Client *</label>
+            <select id="modal-appointment-client" required>
+              <option value="">Select Client...</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-asterisk"></i> Service *</label>
+            <select id="modal-appointment-service" required onchange="updateAppointmentPricing()">
+              <option value="">Select Service...</option>
+              <optgroup label="🔴 Diode Laser - Hair Removal"></optgroup>
+              <optgroup label="💪 EmSculpt - Muscle Sculpting"></optgroup>
+              <optgroup label="✨ AureLift - Face & Body Contouring"></optgroup>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-box"></i> Pricing Type</label>
+            <select id="modal-appointment-pricing-type" onchange="updateAppointmentPricing()">
+              <option value="session">Per Session</option>
+              <option value="package">Package (5+1 Free)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-receipt"></i> Price</label>
+            <input type="text" id="modal-appointment-price" readonly style="background:#f5f5f5;cursor:not-allowed;">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-asterisk"></i> Date *</label>
+            <input type="date" id="modal-appointment-date" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-asterisk"></i> Time *</label>
+            <input type="time" id="modal-appointment-time" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label><i class="fas fa-user-nurse"></i> Staff *</label>
+            <input type="text" id="modal-appointment-staff" placeholder="e.g., Admin User" required>
+          </div>
+          <div class="form-group">
+            <label><i class="fas fa-clock"></i> Duration (mins)</label>
+            <input type="number" id="modal-appointment-duration" placeholder="60" min="15" step="15">
+          </div>
+        </div>
+        <div class="form-group">
+          <label><i class="fas fa-sticky-note"></i> Notes</label>
+          <textarea id="modal-appointment-notes" placeholder="Additional notes"></textarea>
+        </div>
+        <div style="display:flex;gap:15px;justify-content:flex-end;margin-top:25px;">
+          <button type="button" class="btn btn-outline" onclick="closeAddAppointmentModal()">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-calendar-check"></i> Schedule
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== CLIENT DETAIL MODAL (ENHANCED) ========== -->
+  <div id="client-detail-modal" class="modal-overlay hidden">
+    <div class="modal-content" style="max-width:1100px;">
+      <div class="modal-header">
+        <h3><i class="fas fa-user-circle"></i> Client Profile</h3>
+        <button class="modal-close" id="close-client-detail-modal">&times;</button>
+      </div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-bottom:30px;">
+        <div style="background:linear-gradient(135deg,#faf8f9,#fff5f7);border-radius:16px;padding:25px;border-left:5px solid var(--primary);">
+          <h4 style="margin-bottom:20px;color:var(--text-dark);font-family:'Playfair Display',serif;font-size:18px;display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-id-card" style="color:var(--primary);"></i> Client Information
+          </h4>
+          <p style="margin:12px 0;font-size:14px;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--accent);">
+            <strong>Name:</strong> <span id="detail-name"></span>
+          </p>
+          <p style="margin:12px 0;font-size:14px;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--accent);">
+            <strong>Contact:</strong> <span id="detail-contact"></span>
+          </p>
+          <p style="margin:12px 0;font-size:14px;display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed var(--accent);">
+            <strong>Birth Date:</strong> <span id="detail-birthdate"></span>
+          </p>
+          <p style="margin:12px 0;font-size:14px;display:flex;justify-content:space-between;padding:8px 0;">
+            <strong>Medical History:</strong> <span id="detail-medical"></span>
+          </p>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;">
+          <div style="background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:16px;padding:20px;text-align:center;box-shadow:0 8px 25px rgba(212,165,181,0.3);">
+            <div style="font-size:28px;font-weight:700;color:var(--white);" id="detail-visits">0</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.95);margin-top:6px;"><i class="fas fa-calendar-check"></i> Total Visits</div>
+          </div>
+          <div style="background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:16px;padding:20px;text-align:center;box-shadow:0 8px 25px rgba(212,165,181,0.3);">
+            <div style="font-size:28px;font-weight:700;color:var(--white);" id="detail-spent">₱0</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.95);margin-top:6px;"><i class="fas fa-peso-sign"></i> Total Spent</div>
+          </div>
+        </div>
+      </div>
+      
+      <h4 style="margin:30px 0 20px;color:var(--text-dark);display:flex;align-items:center;gap:12px;font-family:'Playfair Display',serif;font-size:20px;">
+        <i class="fas fa-clipboard-list" style="color:var(--primary);"></i> Treatment History
+      </h4>
+      
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Services</th>
+              <th>Medical History</th>
+              <th>Session</th>
+              <th>Staff</th>
+              <th>M.O.P</th>
+              <th>Amount</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="detail-treatments-body">
+            <tr><td colspan="9" style="text-align:center;padding:20px;">No treatments yet</td></tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="display:flex;gap:15px;justify-content:space-between;align-items:center;margin-top:25px;">
+        <button class="btn btn-primary" onclick="bookAppointmentForClientDetail()" style="min-width:220px;">
+          <i class="fas fa-calendar-plus"></i> Book Appointment
+        </button>
+        <button class="btn btn-danger" onclick="deleteClientFromDetail()">
+          <i class="fas fa-trash"></i> Delete Client
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ ONE Script Block -->
+  <script type="module">
+    // ✅ Import Firebase modules ONCE
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getAuth, 
+      signOut, 
+      onAuthStateChanged,
+      setPersistence,
+      browserSessionPersistence
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      deleteDoc, 
+      doc, 
+      updateDoc, 
+      onSnapshot, 
+      query, 
+      where, 
+      getDocs,
+      getDoc,
+      orderBy,
+      writeBatch
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC-uy3DLim-C06ueatkNCr9bZ-4Cnqi5E4",
+      authDomain: "cath-aesthetics.firebaseapp.com",
+      projectId: "cath-aesthetics",
+      storageBucket: "cath-aesthetics.firebasestorage.app",
+      messagingSenderId: 89600382,
+      appId: "1:89600382:web:4b9259e721980ca266c32f",
+      measurementId: "G-V4FRRXM4BC"
+    };
+
+    // ✅ Initialize Firebase ONCE
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    // ✅ Set session persistence ONCE
+    setPersistence(auth, browserSessionPersistence)
+      .then(() => console.log("🔐 Session persistence enabled"))
+      .catch(e => console.warn("⚠️ Persistence warning:", e));
+
+    // Store all data
+    let allClients = [];
+    let allAppointments = [];
+    let clientIds = new Set();
+    let currentUserEmail = '';
+    let currentDetailClientId = null;
+
+    // DOM Elements
+    const authLoading = document.getElementById('auth-loading');
+    const dashboardContent = document.getElementById('dashboard-content');
+    const loadingText = document.getElementById('loading-text');
+    const sidebar = document.getElementById('sidebar');
+
+    // 🔐 Auth Check & Role Verification
+    onAuthStateChanged(auth, async (user) => {
+      console.log("🔐 Admin Dashboard - Auth:", user ? user.email : "NOT logged in");
+
+      if (!user) {
+        console.log("⚠️ Not logged in - redirecting to login");
+        loadingText.textContent = "⚠️ Access denied. Redirecting...";
+        setTimeout(() => { window.location.replace("login.html"); }, 1500);
+        return;
+      }
+
+      currentUserEmail = user.email;
+      loadingText.textContent = "👤 Verifying admin access...";
+
+      try {
+        const q = query(collection(db, "users"), where("email", "==", user.email));
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+          console.log("❌ No user document found");
+          setTimeout(() => { window.location.replace("login.html"); }, 1500);
+          return;
+        }
+
+        const role = snapshot.docs[0].data().role;
+        console.log("📋 User role:", role);
+
+        if (role !== 'admin') {
+          console.log("❌ Access denied: Not an admin");
+          loadingText.textContent = "⚠️ Admin access required. Redirecting...";
+          setTimeout(() => {
+            window.location.replace(role === 'employee' ? "employee-dashboard.html" : "login.html");
+          }, 1500);
+          return;
+        }
+
+        // ✅ Admin access granted
+        console.log("✅ Admin access granted");
+        
+        // Set welcome message with time
+        const hour = new Date().getHours();
+        let greeting = 'Good morning';
+        if (hour >= 12) greeting = 'Good afternoon';
+        if (hour >= 17) greeting = 'Good evening';
+        document.getElementById('welcome-message').textContent = `${greeting}, ${user.email.split('@')[0]}! Here's what's happening at your clinic today.`;
+        
+        document.getElementById('user-email').textContent = user.email;
+        document.getElementById('settings-email').textContent = user.email;
+        document.getElementById('user-avatar').textContent = (user.email || '?').charAt(0).toUpperCase();
+        document.getElementById('settings-avatar').textContent = (user.email || '?').charAt(0).toUpperCase();
+        
+        setTimeout(async () => {
+          authLoading.classList.add('hidden');
+          setTimeout(async () => {
+            authLoading.style.display = 'none';
+            dashboardContent.style.display = 'block';
+            
+            try {
+              await cleanupOrphanedAppointments();
+              await initializePresetServices();
+              
+              loadClients();
+              loadAppointments();
+              loadServices();
+              loadDashboardStats();
+              
+              console.log('✅ Dashboard initialized successfully');
+            } catch (error) {
+              console.error('❌ Initialization error:', error);
+            }
+          }, 500);
+        }, 800);
+
+        history.pushState(null, null, location.href);
+        window.onpopstate = function() { history.pushState(null, null, location.href); };
+
+      } catch (error) {
+        console.error("❌ Auth check error:", error);
+        loadingText.textContent = "❌ Error. Redirecting...";
+        setTimeout(() => { window.location.replace("login.html"); }, 1500);
+      }
+    });
+
+    // 🔐 Logout
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+      console.log("🚪 Logout clicked");
+      try {
+        await signOut(auth);
+        window.location.replace("login.html");
+      } catch (error) {
+        console.error("❌ Logout error:", error);
+        alert('❌ Logout failed: ' + error.message);
+      }
+    });
+
+    // ========== SIDEBAR AUTO-COLLAPSE (FASTER) ==========
+    let sidebarTimeout;
+    
+    function expandSidebar() {
+      sidebar.classList.add('expanded');
+      clearTimeout(sidebarTimeout);
+    }
+    
+    function collapseSidebar() {
+      sidebarTimeout = setTimeout(() => {
+        sidebar.classList.remove('expanded');
+      }, 150); // Reduced from 500ms to 150ms for faster collapse
+    }
+    
+    sidebar?.addEventListener('mouseenter', expandSidebar);
+    sidebar?.addEventListener('mouseleave', collapseSidebar);
+    
+    document.getElementById('toggle-sidebar')?.addEventListener('click', () => {
+      if (sidebar.classList.contains('expanded')) {
+        sidebar.classList.remove('expanded');
+        document.getElementById('toggle-sidebar').querySelector('i').className = 'fas fa-chevron-right';
+      } else {
+        sidebar.classList.add('expanded');
+        document.getElementById('toggle-sidebar').querySelector('i').className = 'fas fa-chevron-left';
+      }
+    });
+
+    // ========== NAVIGATION SYSTEM ==========
+    const menuLinks = document.querySelectorAll('.menu-link');
+    const pageSections = document.querySelectorAll('.page-section');
+
+    menuLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        menuLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+        pageSections.forEach(section => section.classList.remove('active'));
+        const pageName = link.dataset.page;
+        document.getElementById(`${pageName}-page`).classList.add('active');
+        
+        if (pageName === 'dashboard') {
+          loadDashboardStats();
+        } else if (pageName === 'clients') {
+          updateClientOverview();
+        }
+        
+        console.log(`📄 Navigated to: ${pageName}`);
+      });
+    });
+
+    window.navigateTo = (page) => {
+      const link = document.querySelector(`.menu-link[data-page="${page}"]`);
+      if (link) link.click();
+    };
+
+    // ========== CASCADE DELETE SYSTEM ==========
+    async function cleanupOrphanedAppointments() {
+      try {
+        console.log("🔗 Cleaning up orphaned appointments...");
+        
+        const clientsSnapshot = await getDocs(collection(db, "clients"));
+        clientIds = new Set(clientsSnapshot.docs.map(doc => doc.id));
+        
+        const appointmentsSnapshot = await getDocs(collection(db, "appointments"));
+        
+        const orphanedAppointments = [];
+        
+        appointmentsSnapshot.forEach(docSnap => {
+          const appointment = docSnap.data();
+          if (!appointment.clientId || !clientIds.has(appointment.clientId)) {
+            orphanedAppointments.push(docSnap.id);
+          }
+        });
+        
+        if (orphanedAppointments.length > 0) {
+          console.log(`🗑️ Found ${orphanedAppointments.length} orphaned appointments`);
+          
+          const batch = writeBatch(db);
+          orphanedAppointments.forEach(id => {
+            batch.delete(doc(db, "appointments", id));
+          });
+          await batch.commit();
+          
+          console.log(`✅ Cleaned up ${orphanedAppointments.length} orphaned appointments`);
+        }
+        
+      } catch (error) {
+        console.error("❌ Cleanup error:", error);
+      }
+    }
+    
+    // ========== DASHBOARD STATS ==========
+    function loadDashboardStats() {
+      document.getElementById('dash-total-clients').textContent = allClients.length;
+      
+      const today = new Date().toISOString().split('T')[0];
+      const todayAppts = allAppointments.filter(a => a.date === today);
+      document.getElementById('dash-today-appointments').textContent = todayAppts.length;
+      
+      const pendingAppts = allAppointments.filter(a => a.status === 'pending');
+      document.getElementById('dash-pending-appointments').textContent = pendingAppts.length;
+      
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const completedThisMonth = allAppointments.filter(a => {
+        if (a.status !== 'completed' || !a.date) return false;
+        return new Date(a.date) >= monthStart;
+      });
+      const monthlyRevenue = completedThisMonth.reduce((sum, a) => sum + (a.amount || 0), 0);
+      document.getElementById('dash-monthly-revenue').textContent = `₱${monthlyRevenue.toLocaleString('en-PH', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+      
+      const totalVisits = allClients.reduce((sum, c) => sum + c.totalVisits, 0);
+      document.getElementById('dash-total-visits').textContent = totalVisits;
+      
+      loadTodaySchedule(todayAppts);
+      loadRecentClients();
+      loadSystemHealth();
+      addActivity('Dashboard loaded successfully');
+    }
+
+    function loadTodaySchedule(appointments) {
+      const container = document.getElementById('today-schedule-container');
+      
+      if (appointments.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 30px;">No appointments scheduled for today</p>';
+        return;
+      }
+      
+      container.innerHTML = appointments.slice(0, 5).map(appt => {
+        const dateObj = new Date(appt.date);
+        const dateStr = dateObj.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+        
+        return `
+          <div class="schedule-item">
+            <div class="schedule-time">
+              ${appt.time || '--:--'}
+              <div class="schedule-date">${dateStr}</div>
+            </div>
+            <div class="schedule-info">
+              <div class="client-name">${appt.clientName || 'Unknown'}</div>
+              <div class="service">${appt.service || 'Service'}</div>
+              <div class="staff"><i class="fas fa-user-nurse"></i> ${appt.staff || 'Unassigned'}</div>
+            </div>
+            <span class="schedule-status badge ${getStatusClass(appt.status)}">${appt.status || 'pending'}</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function loadRecentClients() {
+      const container = document.getElementById('recent-clients-container');
+      const recentClients = [...allClients]
+        .sort((a, b) => {
+          const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
+          const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : new Date();
+          return bDate - aDate;
+        })
+        .slice(0, 5);
+      
+      if (recentClients.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-muted); padding: 30px;">No clients yet</p>';
+        return;
+      }
+      
+      container.innerHTML = recentClients.map(client => {
+        const initials = client.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        const joinedDate = client.createdAt?.toDate ? client.createdAt.toDate() : new Date();
+        const joinedStr = joinedDate.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' });
+        
+        return `
+          <div class="recent-client-item" onclick="viewClientDetail('${client.id}')">
+            <div class="recent-client-avatar">${initials}</div>
+            <div class="recent-client-info">
+              <div class="name">${client.name}</div>
+              <div class="joined">Joined ${joinedStr}</div>
+            </div>
+            <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function addActivity(content) {
+      const timeline = document.getElementById('activity-timeline');
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-PH', { hour: '2-digit', minute: '2-digit' });
+      
+      const activityHTML = `
+        <div class="activity-item">
+          <div class="activity-time">${timeStr}</div>
+          <div class="activity-content">${content}</div>
+        </div>
+      `;
+      
+      timeline.insertAdjacentHTML('afterbegin', activityHTML);
+      
+      const activities = timeline.querySelectorAll('.activity-item');
+      if (activities.length > 3) {
+        activities.forEach((activity, index) => {
+          if (index >= 3) activity.remove();
+        });
+      }
+    }
+
+    // ========== CLIENT MANAGEMENT ==========
+    function loadClients() {
+      const clientGrid = document.getElementById('client-grid');
+      
+      if (!clientGrid) return;
+      
+      onSnapshot(collection(db, "clients"), async (snapshot) => {
+        allClients = [];
+        clientIds = new Set();
+        
+        for (const docSnap of snapshot.docs) {
+          const client = docSnap.data();
+          const treatmentsSnapshot = await getDocs(collection(db, "clients", docSnap.id, "treatments"));
+          const totalVisits = treatmentsSnapshot.size;
+          const totalSpent = treatmentsSnapshot.docs.reduce((sum, doc) => sum + (doc.data().amount || 0), 0);
+          
+          allClients.push({
+            id: docSnap.id,
+            ...client,
+            totalVisits,
+            totalSpent
+          });
+          
+          clientIds.add(docSnap.id);
+        }
+        
+        applyClientFilter();
+        updateClientOverview();
+        loadDashboardStats();
+      }, (error) => {
+        console.error("Clients load error:", error);
+        clientGrid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;">
+            <i class="fas fa-exclamation-circle" style="color:var(--danger);"></i>
+            <p style="color:var(--danger);">Error loading clients</p>
+          </div>
+        `;
+      });
+    }
+
+    // ========== CLIENT PAGINATION ==========
+    let clientCurrentPage = 1;
+    const clientPageSize = 10; // Show 10 clients per page
+    let clientTotalPages = 1;
+
+    window.clientNextPage = function() {
+      if (clientCurrentPage < clientTotalPages) {
+        clientCurrentPage++;
+        applyClientFilter();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    window.clientPrevPage = function() {
+      if (clientCurrentPage > 1) {
+        clientCurrentPage--;
+        applyClientFilter();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    window.goToClientPage = function(pageNum) {
+      clientCurrentPage = pageNum;
+      applyClientFilter();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    function applyClientFilter() {
+      const filterValue = document.getElementById('client-filter')?.value || 'newest';
+      const searchTerm = document.getElementById('client-search')?.value.toLowerCase() || '';
+      
+      let filtered = [...allClients];
+      
+      if (searchTerm) {
+        filtered = filtered.filter(client => 
+          client.name.toLowerCase().includes(searchTerm) ||
+          (client.contactNumber && client.contactNumber.includes(searchTerm))
+        );
+      }
+      
+      switch(filterValue) {
+        case 'newest':
+          filtered.sort((a, b) => {
+            const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
+            const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : new Date();
+            return bDate - aDate;
+          });
+          break;
+        case 'oldest':
+          filtered.sort((a, b) => {
+            const aDate = a.createdAt?.toDate ? a.createdAt.toDate() : new Date();
+            const bDate = b.createdAt?.toDate ? b.createdAt.toDate() : new Date();
+            return aDate - bDate;
+          });
+          break;
+        case 'most-visits':
+          filtered.sort((a, b) => b.totalVisits - a.totalVisits);
+          break;
+        case 'least-visits':
+          filtered.sort((a, b) => a.totalVisits - b.totalVisits);
+          break;
+        case 'most-spent':
+          filtered.sort((a, b) => b.totalSpent - a.totalSpent);
+          break;
+        case 'least-spent':
+          filtered.sort((a, b) => a.totalSpent - b.totalSpent);
+          break;
+      }
+      
+      clientCurrentPage = 1; // Reset to first page on filter change
+      renderClients(filtered);
+    }
+
+    function renderClients(clients) {
+      const clientGrid = document.getElementById('client-grid');
+      
+      if (!clientGrid) return;
+      
+      if (clients.length === 0) {
+        clientGrid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;">
+            <i class="fas fa-users"></i>
+            <p>No clients found</p>
+            <button class="btn btn-primary" onclick="openAddClientModal()">
+              <i class="fas fa-user-plus"></i> Add Your First Client
+            </button>
+          </div>
+        `;
+        updateClientPaginationControls(clients);
+        return;
+      }
+      
+      // Calculate pagination
+      clientTotalPages = Math.ceil(clients.length / clientPageSize);
+      if (clientCurrentPage > clientTotalPages) clientCurrentPage = clientTotalPages;
+      
+      const startIdx = (clientCurrentPage - 1) * clientPageSize;
+      const endIdx = startIdx + clientPageSize;
+      const paginatedClients = clients.slice(startIdx, endIdx);
+      
+      clientGrid.innerHTML = "";
+      
+      paginatedClients.forEach(client => {
+        const card = document.createElement('div');
+        card.className = 'client-card';
+        
+        const initials = client.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+        
+        card.innerHTML = `
+          <div class="client-card-header">
+            <div class="client-avatar">${initials}</div>
+            <div class="client-info">
+              <h3>${escapeHtml(client.name)}</h3>
+              <p><i class="fas fa-phone"></i> ${escapeHtml(client.contactNumber) || 'No contact'}</p>
+            </div>
+          </div>
+          
+          <div class="client-stats">
+            <div class="client-stat">
+              <div class="value">${client.totalVisits}</div>
+              <div class="label">Visits</div>
+            </div>
+            <div class="client-stat">
+              <div class="value" style="color:var(--success);">₱${client.totalSpent.toFixed(0)}</div>
+              <div class="label">Spent</div>
+            </div>
+          </div>
+          
+          <div class="client-actions">
+            <button class="btn btn-info btn-sm" onclick="viewClientDetail('${client.id}')">
+              <i class="fas fa-eye"></i> View
+            </button>
+            <button class="btn btn-outline btn-sm" onclick="deleteClientWithCascade('${client.id}')">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        `;
+        
+        clientGrid.appendChild(card);
+      });
+      
+      updateClientPaginationControls(clients);
+    }
+
+    function updateClientPaginationControls(clients) {
+      const paginationDiv = document.getElementById('client-pagination') || document.createElement('div');
+      paginationDiv.id = 'client-pagination';
+      paginationDiv.style.cssText = 'display:flex; align-items:center; justify-content:center; gap:10px; margin-top:20px; margin-bottom:20px;';
+      
+      const prevBtn = document.createElement('button');
+      prevBtn.className = 'btn btn-sm';
+      prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+      prevBtn.onclick = clientPrevPage;
+      prevBtn.disabled = clientCurrentPage === 1;
+      
+      const nextBtn = document.createElement('button');
+      nextBtn.className = 'btn btn-sm';
+      nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+      nextBtn.onclick = clientNextPage;
+      nextBtn.disabled = clientCurrentPage === clientTotalPages;
+      
+      paginationDiv.innerHTML = '';
+      paginationDiv.appendChild(prevBtn);
+      
+      // Page number buttons
+      const maxButtons = 5;
+      let startPage = Math.max(1, clientCurrentPage - Math.floor(maxButtons / 2));
+      let endPage = Math.min(clientTotalPages, startPage + maxButtons - 1);
+      startPage = Math.max(1, endPage - maxButtons + 1);
+      
+      for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.className = 'btn btn-sm';
+        pageBtn.textContent = i;
+        if (i === clientCurrentPage) {
+          pageBtn.style.backgroundColor = 'var(--primary)';
+          pageBtn.style.color = '#fff';
+        }
+        pageBtn.onclick = () => goToClientPage(i);
+        paginationDiv.appendChild(pageBtn);
+      }
+      
+      paginationDiv.appendChild(nextBtn);
+      
+      const pageInfo = document.createElement('span');
+      pageInfo.style.cssText = 'font-size:12px; color:#999; margin-left:20px;';
+      pageInfo.textContent = `Page ${clientCurrentPage} of ${clientTotalPages} (${clients.length} total)`;
+      paginationDiv.appendChild(pageInfo);
+      
+      const parentContainer = document.getElementById('client-grid')?.parentNode;
+      if (parentContainer) {
+        const existingPagination = document.getElementById('client-pagination');
+        if (existingPagination) {
+          existingPagination.remove();
+        }
+        parentContainer.appendChild(paginationDiv);
+      }
+    }
+
+    document.getElementById('client-filter')?.addEventListener('change', applyClientFilter);
+    document.getElementById('client-search')?.addEventListener('input', applyClientFilter);
+
+    function updateClientOverview() {
+      const totalClients = allClients.length;
+      const activeClients = allClients.filter(c => c.totalVisits > 0).length;
+      const totalVisits = allClients.reduce((sum, c) => sum + c.totalVisits, 0);
+      const totalRevenue = allClients.reduce((sum, c) => sum + c.totalSpent, 0);
+      
+      document.getElementById('overview-total-clients').textContent = totalClients;
+      document.getElementById('overview-active-clients').textContent = activeClients;
+      document.getElementById('overview-total-visits').textContent = totalVisits;
+      document.getElementById('overview-total-revenue').textContent = `₱${totalRevenue.toLocaleString('en-PH', {minimumFractionDigits: 0, maximumFractionDigits: 0})}`;
+    }
+
+    // ========== ADD CLIENT MODAL ==========
+    window.openAddClientModal = () => {
+      const modal = document.getElementById('add-client-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.add('active');
+      }, 10);
+    };
+
+    window.closeAddClientModal = () => {
+      const modal = document.getElementById('add-client-modal');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+      document.getElementById('add-client-form').reset();
+    };
+
+    document.getElementById('close-add-client-modal')?.addEventListener('click', closeAddClientModal);
+    
+    document.getElementById('add-client-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('new-client-name').value.trim();
+      const contactNumber = document.getElementById('new-client-contact').value.trim();
+      const birthDateInput = document.getElementById('new-client-birthdate').value;
+      const medicalHistory = document.getElementById('new-client-medical').value.trim();
+      
+      if (!name || !contactNumber) {
+        alert('⚠️ Name and Contact are required!');
+        return;
+      }
+      
+      try {
+        const clientData = {
+          name,
+          contactNumber,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        if (birthDateInput) {
+          clientData.birthDate = new Date(birthDateInput);
+        }
+        
+        if (medicalHistory) {
+          clientData.medicalHistory = medicalHistory;
+        }
+        
+        await addDoc(collection(db, "clients"), clientData);
+        
+        closeAddClientModal();
+        alert('✅ Client added successfully!');
+        addActivity(`Added new client: ${name}`);
+        
+      } catch (error) {
+        console.error("Add client error:", error);
+        alert('❌ Failed to add client: ' + error.message);
+      }
+    });
+
+    // ========== ADD APPOINTMENT MODAL ==========
+    window.openAddAppointmentModal = (prefillClientId = null) => {
+      loadClientDropdownForModal();
+      populateServiceDropdown();
+
+      // If opened from a client profile, preselect that client.
+      const clientSelect = document.getElementById('modal-appointment-client');
+      const selectedClientId = prefillClientId || currentDetailClientId;
+      if (clientSelect && selectedClientId) clientSelect.value = selectedClientId;
+      
+      // Attach service change listener when modal opens
+      const serviceSelect = document.getElementById('modal-appointment-service');
+      if (serviceSelect) {
+        // Remove old listeners to prevent duplicates
+        const newSelect = serviceSelect.cloneNode(true);
+        serviceSelect.parentNode.replaceChild(newSelect, serviceSelect);
+        newSelect.addEventListener('change', updateAppointmentPricing);
+      }
+      
+      const modal = document.getElementById('add-appointment-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.add('active');
+      }, 10);
+    };
+
+    window.closeAddAppointmentModal = () => {
+      const modal = document.getElementById('add-appointment-modal');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+      const form = document.getElementById('add-appointment-form-modal');
+      if (form) {
+        form.reset();
+        // Explicitly reset ALL form fields
+        const clientSelect = document.getElementById('modal-appointment-client');
+        const serviceSelect = document.getElementById('modal-appointment-service');
+        const pricingSelect = document.getElementById('modal-appointment-pricing-type');
+        const priceDisplay = document.getElementById('modal-appointment-price');
+        if (clientSelect) clientSelect.value = '';
+        if (serviceSelect) serviceSelect.value = '';
+        if (pricingSelect) pricingSelect.value = 'session';
+        if (priceDisplay) priceDisplay.value = '';
+      }
+    };
+
+    document.getElementById('close-add-appointment-modal')?.addEventListener('click', closeAddAppointmentModal);
+
+    function loadClientDropdownForModal() {
+      const select = document.getElementById('modal-appointment-client');
+      if (!select) return;
+      
+      select.innerHTML = '<option value="">Select Client...</option>';
+      
+      allClients.forEach(client => {
+        const option = document.createElement('option');
+        option.value = client.id;
+        option.textContent = client.name;
+        select.appendChild(option);
+      });
+    }
+
+    document.getElementById('add-appointment-form-modal')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const clientId = document.getElementById('modal-appointment-client').value;
+      const clientSelect = document.getElementById('modal-appointment-client');
+      const clientName = clientSelect.options[clientSelect.selectedIndex]?.text || 'Unknown';
+      
+      if (!clientId) {
+        alert('⚠️ Please select a client first!');
+        document.getElementById('modal-appointment-client').focus();
+        return;
+      }
+      
+      const serviceSelectValue = document.getElementById('modal-appointment-service').value;
+      if (!serviceSelectValue) {
+        alert('⚠️ Please select a service!');
+        document.getElementById('modal-appointment-service').focus();
+        return;
+      }
+      
+      let serviceName = '';
+      let servicePrice = 0;
+      let serviceId = '';
+      
+      // Parse service data if available
+      try {
+        const serviceData = JSON.parse(serviceSelectValue);
+        serviceName = serviceData.name;
+        serviceId = serviceData.id;
+        const pricingType = document.getElementById('modal-appointment-pricing-type').value;
+        servicePrice = pricingType === 'package' ? serviceData.package_price : serviceData.price;
+      } catch (e) {
+        alert('⚠️ Invalid service selection. Please try again.');
+        console.error('Service parse error:', e);
+        return;
+      }
+      
+      const appointmentDate = document.getElementById('modal-appointment-date').value;
+      const appointmentTime = document.getElementById('modal-appointment-time').value;
+      const appointmentStaff = document.getElementById('modal-appointment-staff').value.trim();
+      
+      // Validate all required fields
+      const validationErrors = [];
+      if (!appointmentDate) validationErrors.push('Date is required');
+      if (!appointmentTime) validationErrors.push('Time is required');
+      if (!appointmentStaff) validationErrors.push('Staff is required');
+      
+      if (validationErrors.length > 0) {
+        alert('⚠️ Please fill in all required fields:\n• ' + validationErrors.join('\n• '));
+        return;
+      }
+      
+      // Validate date is not in the past
+      const selectedDate = new Date(appointmentDate);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (selectedDate < today) {
+        alert('⚠️ Cannot schedule appointments in the past!');
+        document.getElementById('modal-appointment-date').focus();
+        return;
+      }
+      
+      const appointmentData = {
+        clientId,
+        clientName,
+        service: serviceName,
+        serviceId: serviceId,
+        price: servicePrice,
+        pricingType: document.getElementById('modal-appointment-pricing-type').value,
+        date: appointmentDate,
+        time: appointmentTime,
+        staff: appointmentStaff,
+        duration: parseInt(document.getElementById('modal-appointment-duration').value) || 60,
+        notes: document.getElementById('modal-appointment-notes').value.trim(),
+        status: 'pending',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      try {
+        await addDoc(collection(db, "appointments"), appointmentData);
+        
+        closeAddAppointmentModal();
+        alert('✅ Appointment scheduled successfully!');
+        addActivity(`Scheduled: ${clientName} - ${appointmentData.service}`);
+        console.log('✅ Appointment saved:', appointmentData);
+        
+      } catch (error) {
+        console.error("Add appointment error:", error);
+        alert('❌ Failed to schedule appointment: ' + error.message);
+      }
+    });
+
+    // ========== CLIENT DETAIL MODAL ==========
+    window.viewClientDetail = async (clientId) => {
+      try {
+        const clientDoc = await getDoc(doc(db, "clients", clientId));
+        if (!clientDoc.exists()) {
+          alert('❌ Client not found');
+          return;
+        }
+        
+        const client = clientDoc.data();
+        currentDetailClientId = clientId;
+        
+        document.getElementById('detail-name').textContent = client.name || '-';
+        document.getElementById('detail-contact').textContent = client.contactNumber || '-';
+        document.getElementById('detail-birthdate').textContent = client.birthDate ? formatDate(client.birthDate) : '-';
+        document.getElementById('detail-medical').textContent = client.medicalHistory || 'None';
+        
+        loadClientTreatments(clientId);
+        
+        const modal = document.getElementById('client-detail-modal');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+          modal.classList.add('active');
+        }, 10);
+        
+      } catch (error) {
+        console.error("View client error:", error);
+        alert('❌ Failed to load client: ' + error.message);
+      }
+    };
+
+    function loadClientTreatments(clientId) {
+      const tableBody = document.getElementById('detail-treatments-body');
+      if (!tableBody) return;
+      
+      onSnapshot(collection(db, "clients", clientId, "treatments"), (snapshot) => {
+        tableBody.innerHTML = "";
+        
+        if (snapshot.empty) {
+          tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:20px;">No treatments yet</td></tr>`;
+          document.getElementById('detail-visits').textContent = '0';
+          document.getElementById('detail-spent').textContent = '₱0';
+          return;
+        }
+        
+        const totalVisits = snapshot.size;
+        const totalSpent = snapshot.docs.reduce((sum, doc) => sum + (doc.data().amount || 0), 0);
+        
+        document.getElementById('detail-visits').textContent = totalVisits;
+        document.getElementById('detail-spent').textContent = `₱${totalSpent.toFixed(0)}`;
+        
+        snapshot.forEach(docSnap => {
+          const t = docSnap.data();
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${t.date ? formatDate(t.date) : '-'}</td>
+            <td>${t.time || '-'}</td>
+            <td>${(t.services || []).join(', ') || '-'}</td>
+            <td>${t.medicalHistory || '-'}</td>
+            <td>${t.session || '-'}</td>
+            <td>${t.staff || '-'}</td>
+            <td>${t.mop || '-'}</td>
+            <td><strong style="color:var(--success);">₱${(t.amount || 0).toFixed(0)}</strong></td>
+            <td>${t.notes || '-'}</td>
+          `;
+          tableBody.appendChild(row);
+        });
+      });
+    }
+
+    document.getElementById('close-client-detail-modal')?.addEventListener('click', () => {
+      const modal = document.getElementById('client-detail-modal');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+      currentDetailClientId = null;
+    });
+
+    window.bookAppointmentForClientDetail = () => {
+      if (!currentDetailClientId) {
+        alert('⚠️ Select a client first.');
+        return;
+      }
+
+      const modal = document.getElementById('client-detail-modal');
+      if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+      }
+
+      openAddAppointmentModal(currentDetailClientId);
+    };
+
+    window.deleteClientFromDetail = async () => {
+      if (!currentDetailClientId) return;
+      await deleteClientWithCascade(currentDetailClientId);
+      const modal = document.getElementById('client-detail-modal');
+      modal.classList.remove('active');
+      modal.classList.add('hidden');
+    };
+
+    window.deleteClientWithCascade = async (clientId) => {
+      try {
+        const appointmentsSnapshot = await getDocs(
+          query(collection(db, "appointments"), where("clientId", "==", clientId))
+        );
+        
+        const appointmentCount = appointmentsSnapshot.size;
+        
+        let confirmMessage = `⚠️ Are you sure you want to delete this client?`;
+        
+        if (appointmentCount > 0) {
+          confirmMessage += `\n\n📋 This will also delete:\n• ${appointmentCount} appointment(s)\n• All treatment history\n\nThis action cannot be undone!`;
+        }
+        
+        if (!confirm(confirmMessage)) {
+          return;
+        }
+        
+        const batch = writeBatch(db);
+        
+        appointmentsSnapshot.forEach(docSnap => {
+          batch.delete(docSnap.ref);
+        });
+        
+        const treatmentsSnapshot = await getDocs(collection(db, "clients", clientId, "treatments"));
+        treatmentsSnapshot.forEach(docSnap => {
+          batch.delete(docSnap.ref);
+        });
+        
+        batch.delete(doc(db, "clients", clientId));
+        
+        await batch.commit();
+        
+        console.log(`✅ Deleted client ${clientId} and ${appointmentCount} appointments`);
+        alert(`✅ Client deleted successfully (${appointmentCount} appointments removed)`);
+        addActivity(`Deleted client and ${appointmentCount} appointments`);
+        
+      } catch (error) {
+        console.error("❌ Cascade delete error:", error);
+        alert('❌ Failed to delete client: ' + error.message);
+      }
+    };
+
+    // ========== SERVICE MANAGEMENT ==========
+    let allServices = [];
+    let currentServiceFilter = 'all';
+
+    // ========== LOAD SERVICES ==========
+    function loadServices() {
+      const servicesGrid = document.getElementById('services-grid');
+      if (!servicesGrid) return;
+      
+      onSnapshot(collection(db, "services"), (snapshot) => {
+        allServices = [];
+        
+        snapshot.forEach(docSnap => {
+          allServices.push({ id: docSnap.id, ...docSnap.data() });
+        });
+        
+        // Sort by category then name
+        allServices.sort((a, b) => {
+          if (a.category !== b.category) return a.category.localeCompare(b.category);
+          return a.name.localeCompare(b.name);
+        });
+        
+        renderServices(allServices);
+      }, (error) => {
+        console.error("Services load error:", error);
+        servicesGrid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;">
+            <i class="fas fa-exclamation-circle" style="color:var(--danger);"></i>
+            <p style="color:var(--danger);">Error loading services</p>
+          </div>
+        `;
+      });
+    }
+
+    // ========== FILTER SERVICES BY CATEGORY ==========
+    window.filterServicesByCategory = function(category) {
+      currentServiceFilter = category;
+      
+      // Update active tab
+      document.querySelectorAll('[data-service]').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.querySelector(`[data-service="${category}"]`).classList.add('active');
+      
+      // Filter and render
+      let filtered = allServices;
+      if (category !== 'all') {
+        filtered = allServices.filter(s => s.category === category);
+      }
+      
+      renderServices(filtered);
+    };
+
+    // ========== RENDER SERVICES ==========
+    function renderServices(services) {
+      const servicesGrid = document.getElementById('services-grid');
+      if (!servicesGrid) return;
+      
+      if (services.length === 0) {
+        servicesGrid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;">
+            <i class="fas fa-spa"></i>
+            <p>No services found</p>
+            <button class="btn btn-primary btn-sm" onclick="openAddServiceModal()" style="margin-top:15px;">
+              <i class="fas fa-plus-circle"></i> Add Service
+            </button>
+          </div>
+        `;
+        return;
+      }
+      
+      servicesGrid.innerHTML = services.map(service => {
+        const savingsAmount = service.package_price - service.price;
+        const totalSessions = (service.package_sessions || 5) + (service.free_sessions || 1);
+        const savingsPercent = Math.round((savingsAmount / service.package_price) * 100);
+        
+        const categoryIcons = {
+          'diode': '🔴',
+          'emsculpt': '💪',
+          'aurelift': '✨'
+        };
+        
+        const categoryNames = {
+          'diode': 'Diode Laser - Hair Removal',
+          'emsculpt': 'EmSculpt - Muscle Sculpting',
+          'aurelift': 'AureLift - Face & Body Contouring'
+        };
+        
+        return `
+          <div class="service-card">
+            <div class="service-header">
+              <div class="service-category-badge">
+                ${categoryIcons[service.category] || '✨'} ${service.category.toUpperCase()}
+              </div>
+              <div class="service-name">${escapeHtml(service.name)}</div>
+              ${service.description ? `<div class="service-description">${escapeHtml(service.description)}</div>` : ''}
+            </div>
+            
+            <div class="service-pricing">
+              <div class="price-item">
+                <div class="price-label">Per Session</div>
+                <div class="price-value">
+                  <span class="currency">₱</span>${Math.round(service.price).toLocaleString()}
+                </div>
+              </div>
+              <div class="price-item">
+                <div class="price-label">Package (${(service.package_sessions || 5)}+${(service.free_sessions || 1)} Free)</div>
+                <div class="price-value">
+                  <span class="currency">₱</span>${Math.round(service.package_price).toLocaleString()}
+                  <span class="period">/ ${totalSessions} sessions</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="service-package-info">
+              <i class="fas fa-percent"></i>
+              <span><strong>Save ₱${Math.round(savingsAmount).toLocaleString()}</strong> (${savingsPercent}% off) with package</span>
+            </div>
+            
+            <div class="service-stat">
+              <i class="fas fa-check-circle"></i>
+              ${totalSessions} total sessions • ${service.package_sessions || 5} paid + ${service.free_sessions || 1} free
+            </div>
+            
+            <div class="service-actions">
+              <button class="btn btn-info btn-sm" onclick="selectServiceForAppointment('${service.id}', '${escapeHtml(service.name)}', ${service.price}, ${service.package_price}, ${service.package_sessions || 5})">
+                <i class="fas fa-check"></i> Use Service
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="deleteService('${service.id}')">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ========== OPEN ADD SERVICE MODAL ==========
+    window.openAddServiceModal = () => {
+      const modal = document.getElementById('add-service-modal');
+      modal.classList.remove('hidden');
+      setTimeout(() => {
+        modal.classList.add('active');
+      }, 10);
+    };
+
+    // ========== CLOSE ADD SERVICE MODAL ==========
+    window.closeAddServiceModal = () => {
+      const modal = document.getElementById('add-service-modal');
+      modal.classList.remove('active');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+      }, 300);
+      document.getElementById('add-service-form').reset();
+    };
+
+    document.getElementById('close-add-service-modal')?.addEventListener('click', closeAddServiceModal);
+
+    // ========== UPDATE SERVICE CATEGORY INFO ==========
+    window.updateServiceCategoryInfo = function() {
+      const category = document.getElementById('service-category').value;
+      const categoryInfo = {
+        'diode': 'Diode Laser - Hair Removal',
+        'emsculpt': 'EmSculpt - Muscle Sculpting',
+        'aurelift': 'AureLift - Face & Body Contouring'
+      };
+      console.log('Selected category:', categoryInfo[category] || 'None');
+    };
+
+    // ========== ADD SERVICE FORM SUBMIT ==========
+    document.getElementById('add-service-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const serviceData = {
+        category: document.getElementById('service-category').value.trim(),
+        name: document.getElementById('service-name').value.trim(),
+        price: parseFloat(document.getElementById('service-price').value),
+        package_sessions: parseInt(document.getElementById('service-package-sessions').value) || 5,
+        package_price: parseFloat(document.getElementById('service-package-price').value),
+        free_sessions: parseInt(document.getElementById('service-free-sessions').value) || 1,
+        description: document.getElementById('service-description').value.trim(),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      if (!serviceData.category || !serviceData.name || !serviceData.price || !serviceData.package_price) {
+        alert('⚠️ Please fill in all required fields!');
+        return;
+      }
+      
+      try {
+        await addDoc(collection(db, "services"), serviceData);
+        closeAddServiceModal();
+        alert('✅ Service added successfully!');
+        addActivity(`Added new service: ${serviceData.name}`);
+      } catch (error) {
+        console.error("Add service error:", error);
+        alert('❌ Failed to add service: ' + error.message);
+      }
+    });
+
+    // ========== SELECT SERVICE FOR APPOINTMENT ==========
+    window.selectServiceForAppointment = function(serviceId, serviceName, price, packagePrice, packageSessions) {
+      // Find the service in allServices and set it properly
+      const service = allServices.find(s => s.id === serviceId);
+      if (service) {
+        const serviceSelect = document.getElementById('modal-appointment-service');
+        if (serviceSelect) {
+          // Create the value object as stored value
+          const serviceValue = JSON.stringify({
+            id: service.id,
+            name: service.name,
+            price: service.price,
+            package_price: service.package_price,
+            package_sessions: service.package_sessions,
+            free_sessions: service.free_sessions
+          });
+          serviceSelect.value = serviceValue;
+          // Trigger change to update pricing
+          updateAppointmentPricing();
+        }
+      }
+      
+      // Navigate to appointments page and open form
+      navigateTo('appointments');
+      setTimeout(() => {
+        openAddAppointmentModal();
+        alert(`✅ Service "${serviceName}" selected! Complete the appointment form.`);
+      }, 300);
+    };
+
+    // ========== DELETE SERVICE ==========
+    window.deleteService = async function(serviceId) {
+      if (!confirm('⚠️ Are you sure you want to delete this service?')) return;
+      
+      try {
+        await deleteDoc(doc(db, "services", serviceId));
+        alert('✅ Service deleted successfully!');
+        addActivity('Deleted a service');
+      } catch (error) {
+        console.error("Delete service error:", error);
+        alert('❌ Failed to delete service: ' + error.message);
+      }
+    };
+
+    // ========== LOAD PRESET SERVICES (INITIALIZE) ==========
+    async function initializePresetServices() {
+      try {
+        const servicesRef = collection(db, "services");
+        const existingServices = await getDocs(servicesRef);
+        
+        // If services already exist, don't reload
+        if (existingServices.size > 0) return;
+        
+        // Preset services - YOUR PACKAGE LIST
+        const presetServices = [
+          // DIODE LASER
+          { category: 'diode', name: 'Upper Lip & Lower Lip', price: 588, package_sessions: 5, package_price: 2888, free_sessions: 1, description: 'Hair removal for face' },
+          { category: 'diode', name: 'Chin Jaw', price: 788, package_sessions: 5, package_price: 3888, free_sessions: 1, description: 'Chin and jaw area hair removal' },
+          { category: 'diode', name: 'Underarm', price: 788, package_sessions: 5, package_price: 3888, free_sessions: 1, description: 'Underarm hair removal' },
+          { category: 'diode', name: 'Arms', price: 1988, package_sessions: 5, package_price: 9888, free_sessions: 1, description: 'Full arm hair removal' },
+          { category: 'diode', name: 'Half Legs', price: 1988, package_sessions: 5, package_price: 9888, free_sessions: 1, description: 'Half leg hair removal' },
+          { category: 'diode', name: 'Full Legs', price: 2588, package_sessions: 5, package_price: 12888, free_sessions: 1, description: 'Complete leg hair removal' },
+          { category: 'diode', name: 'Brazilian', price: 1988, package_sessions: 5, package_price: 9888, free_sessions: 1, description: 'Brazilian wax alternative' },
+          
+          // EMSCULPT
+          { category: 'emsculpt', name: 'Arms', price: 1588, package_sessions: 5, package_price: 6288, free_sessions: 1, description: 'EmSculpt arm muscle sculpting' },
+          { category: 'emsculpt', name: 'Tummy', price: 2588, package_sessions: 5, package_price: 10288, free_sessions: 1, description: 'Core and abdominal sculpting' },
+          { category: 'emsculpt', name: 'Butt', price: 2588, package_sessions: 5, package_price: 10288, free_sessions: 1, description: 'Glute lifting and toning' },
+          { category: 'emsculpt', name: 'Thighs', price: 2588, package_sessions: 5, package_price: 10288, free_sessions: 1, description: 'Thigh toning and sculpting' },
+          { category: 'emsculpt', name: 'Legs', price: 1588, package_sessions: 5, package_price: 6288, free_sessions: 1, description: 'Leg muscle enhancement' },
+          
+          // AURELIFT
+          { category: 'aurelift', name: 'Hydra Facial with AureLift', price: 1988, package_sessions: 5, package_price: 7888, free_sessions: 1, description: 'Advanced facial hydration with lifting' },
+          { category: 'aurelift', name: 'Face', price: 988, package_sessions: 5, package_price: 3888, free_sessions: 1, description: 'Facial contouring and lifting' },
+          { category: 'aurelift', name: 'Tummy', price: 1588, package_sessions: 5, package_price: 6288, free_sessions: 1, description: 'Abdominal skin tightening' },
+          { category: 'aurelift', name: 'Thigh', price: 1788, package_sessions: 5, package_price: 7088, free_sessions: 1, description: 'Thigh skin tightening' },
+          { category: 'aurelift', name: 'Butt', price: 1588, package_sessions: 5, package_price: 6288, free_sessions: 1, description: 'Gluteal lifting and tightening' }
+        ];
+        
+        // Add all preset services
+        const batch = writeBatch(db);
+        presetServices.forEach(service => {
+          const docRef = doc(collection(db, "services"));
+          batch.set(docRef, {
+            ...service,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        });
+        
+        await batch.commit();
+        console.log('✅ Preset services initialized!');
+        loadServices();
+        
+      } catch (error) {
+        console.error("Initialize services error:", error);
+      }
+    }
+
+    // ========== POPULATE APPOINTMENT SERVICE DROPDOWN ==========
+    function populateServiceDropdown() {
+      const serviceSelect = document.getElementById('modal-appointment-service');
+      if (!serviceSelect) return;
+      
+      // Check if services are loaded
+      if (!allServices || allServices.length === 0) {
+        serviceSelect.innerHTML = '<option value="">Loading services...</option>';
+        // Retry in 500ms if services not ready
+        setTimeout(populateServiceDropdown, 500);
+        return;
+      }
+      
+      // Group services by category
+      const grouped = {
+        'diode': [],
+        'emsculpt': [],
+        'aurelift': []
+      };
+      
+      allServices.forEach(service => {
+        if (grouped[service.category]) {
+          grouped[service.category].push(service);
+        }
+      });
+      
+      // Clear and rebuild options
+      serviceSelect.innerHTML = '<option value="">Select Service...</option>';
+      
+      const categoryLabels = {
+        'diode': '🔴 Diode Laser - Hair Removal',
+        'emsculpt': '💪 EmSculpt - Muscle Sculpting',
+        'aurelift': '✨ AureLift - Face & Body Contouring'
+      };
+      
+      Object.keys(grouped).forEach(category => {
+        if (grouped[category].length > 0) {
+          const optgroup = document.createElement('optgroup');
+          optgroup.label = categoryLabels[category];
+          
+          grouped[category].forEach(service => {
+            const option = document.createElement('option');
+            option.value = JSON.stringify({
+              id: service.id,
+              name: service.name,
+              price: service.price,
+              package_price: service.package_price,
+              package_sessions: service.package_sessions,
+              free_sessions: service.free_sessions
+            });
+            option.textContent = `${service.name} (₱${Math.round(service.price).toLocaleString()}/session)`;
+            optgroup.appendChild(option);
+          });
+          
+          serviceSelect.appendChild(optgroup);
+        }
+      });
+    }
+
+    // ========== UPDATE APPOINTMENT PRICING ==========
+    window.updateAppointmentPricing = function() {
+      const serviceSelect = document.getElementById('modal-appointment-service');
+      const pricingTypeSelect = document.getElementById('modal-appointment-pricing-type');
+      const priceDisplay = document.getElementById('modal-appointment-price');
+      
+      if (!serviceSelect || !pricingTypeSelect || !priceDisplay) return;
+      
+      if (!serviceSelect.value) {
+        priceDisplay.value = '';
+        priceDisplay.placeholder = 'Select a service first';
+        return;
+      }
+      
+      try {
+        const serviceData = JSON.parse(serviceSelect.value);
+        const pricingType = pricingTypeSelect.value;
+        
+        if (pricingType === 'package') {
+          const totalSessions = (serviceData.package_sessions || 5) + (serviceData.free_sessions || 1);
+          priceDisplay.value = `₱${Math.round(serviceData.package_price).toLocaleString()} (${totalSessions} sessions)`;
+        } else {
+          priceDisplay.value = `₱${Math.round(serviceData.price).toLocaleString()} per session`;
+        }
+      } catch (error) {
+        console.error("Pricing update error:", error);
+      }
+    };
+
+    // Service dropdown change listener will be added when modal opens
+    // to ensure reliable event binding
+
+    // ========== APPOINTMENT DIAGNOSTICS ==========
+    window.appointmentDiagnostics = function() {
+      console.clear();
+      console.log('🔍 APPOINTMENT SYSTEM DIAGNOSTICS');
+      console.log('================================');
+      console.log('Total Clients:', allClients.length);
+      console.log('Client IDs:', Array.from(clientIds));
+      console.log('Total Appointments:', allAppointments.length);
+      console.log('Sample Appointment:', allAppointments[0]);
+      console.log('Total Services:', allServices.length);
+      console.log('Service Sample:', allServices[0]);
+      
+      if (allAppointments.length === 0) {
+        console.warn('⚠️ WARNING: No appointments found!');
+      } else {
+        console.log('✅ Appointments are loaded');
+      }
+    };
+
+    // ========== APPOINTMENT MANAGEMENT ==========
+    function loadAppointments() {
+      const tableBody = document.getElementById('appointments-table-body');
+      const appointmentsCount = document.getElementById('appointments-total-count');
+      
+      if (!tableBody) return;
+      
+      onSnapshot(
+        query(collection(db, "appointments"), orderBy("date", "desc"), orderBy("time", "asc")),
+        (snapshot) => {
+          allAppointments = [];
+          
+          snapshot.forEach(docSnap => {
+            allAppointments.push({ id: docSnap.id, ...docSnap.data() });
+          });
+          
+          // Keep all appointments with valid clientId - don't filter out
+          allAppointments = allAppointments.filter(appt => appt.clientId);
+          
+          // Update stats
+          updateAppointmentStats();
+          
+          // Initial render of all appointments
+          renderAllAppointments(allAppointments);
+          
+          if (appointmentsCount) appointmentsCount.textContent = `(${allAppointments.length})`;
+          
+          loadDashboardStats();
+        },
+        (error) => {
+          console.error("Appointments load error:", error);
+          tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--danger);">❌ Error loading appointments</td></tr>`;
+        }
+      );
+    }
+
+    // ========== NEW: APPOINTMENT STATS ==========
+    function updateAppointmentStats() {
+      const today = new Date().toISOString().split('T')[0];
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      
+      const todayAppts = allAppointments.filter(a => a.date === today);
+      const completedMonth = allAppointments.filter(a => {
+        if (a.status !== 'completed' || !a.date) return false;
+        return new Date(a.date) >= monthStart;
+      });
+      const pendingAppts = allAppointments.filter(a => a.status === 'pending');
+      
+      document.getElementById('appt-today-count').textContent = todayAppts.length;
+      document.getElementById('appt-completed-count').textContent = completedMonth.length;
+      document.getElementById('appt-pending-count').textContent = pendingAppts.length;
+      document.getElementById('appt-total-count').textContent = allAppointments.length;
+    }
+
+    // ========== APPOINTMENT PAGINATION ==========
+    let appointmentCurrentPage = 1;
+    const appointmentPageSize = 10; // Show 10 appointments per page
+    let appointmentTotalPages = 1;
+
+    window.appointmentNextPage = function() {
+      if (appointmentCurrentPage < appointmentTotalPages) {
+        appointmentCurrentPage++;
+        renderAllAppointments(allAppointments);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    window.appointmentPrevPage = function() {
+      if (appointmentCurrentPage > 1) {
+        appointmentCurrentPage--;
+        renderAllAppointments(allAppointments);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    window.goToAppointmentPage = function(pageNum) {
+      appointmentCurrentPage = pageNum;
+      renderAllAppointments(allAppointments);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // ========== FILTER AND SORT STATE ==========
+    let appointmentFilterState = { status: '', search: '', sortBy: 'newest' };
+    
+    // ========== APPLY FILTERS AND SORTING ==========
+    function applyAppointmentFiltersAndSort() {
+      appointmentCurrentPage = 1; // Reset to first page
+      let filtered = allAppointments;
+      
+      // Apply status filter
+      if (appointmentFilterState.status) {
+        filtered = filtered.filter(a => a.status === appointmentFilterState.status);
+      }
+      
+      // Apply search filter
+      if (appointmentFilterState.search) {
+        filtered = filtered.filter(a => 
+          (a.clientName || '').toLowerCase().includes(appointmentFilterState.search)
+        );
+      }
+      
+      // Apply sorting
+      let sorted = [...filtered];
+      const sortBy = appointmentFilterState.sortBy || 'newest';
+      
+      switch(sortBy) {
+        case 'newest':
+          sorted.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+          break;
+        case 'oldest':
+          sorted.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+          break;
+        case 'soonest':
+          sorted.sort((a, b) => {
+            const aDate = new Date(a.date || '9999-12-31');
+            const bDate = new Date(b.date || '9999-12-31');
+            return aDate - bDate;
+          });
+          break;
+      }
+      
+      renderAllAppointments(sorted);
+    }
+
+    // ========== FILTER APPOINTMENTS BY STATUS ==========
+    window.filterAppointmentsByStatus = function() {
+      appointmentFilterState.status = document.getElementById('appointment-status-filter')?.value || '';
+      appointmentFilterState.search = document.getElementById('appointment-search')?.value.toLowerCase() || '';
+      applyAppointmentFiltersAndSort();
+    };
+
+    // ========== SORT APPOINTMENTS ==========
+    window.sortAppointments = function() {
+      appointmentFilterState.sortBy = document.getElementById('appointment-date-sort')?.value || 'newest';
+      applyAppointmentFiltersAndSort();
+    };
+
+    // Add search event listener
+    document.getElementById('appointment-search')?.addEventListener('input', filterAppointmentsByStatus);
+
+    // ========== RENDER ALL APPOINTMENTS (TABLE) ==========
+    function renderAllAppointments(appointments) {
+      const tableBody = document.getElementById('appointments-table-body');
+      
+      if (!tableBody) return;
+      
+      if (appointments.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="9">
+              <div class="appointment-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No appointments found</p>
+              </div>
+            </td>
+          </tr>`;
+        return;
+      }
+      
+      tableBody.innerHTML = "";
+      
+      // Calculate pagination
+      appointmentTotalPages = Math.ceil(appointments.length / appointmentPageSize);
+      const startIdx = (appointmentCurrentPage - 1) * appointmentPageSize;
+      const endIdx = startIdx + appointmentPageSize;
+      const pageAppointments = appointments.slice(startIdx, endIdx);
+      
+      pageAppointments.forEach(appt => {
+        const clientName = appt.clientName || 'Unknown';
+        const statusClass = getStatusClass(appt.status);
+        const dateStr = appt.date ? formatDate(new Date(appt.date)) : '-';
+        const currentStatus = appt.status || 'pending';
+        
+        const row = document.createElement('tr');
+        
+        // Add styling and click handler for completed appointments
+        if (currentStatus === 'completed') {
+          row.style.background = '#f0fdf4';
+          row.style.cursor = 'pointer';
+          row.onmouseover = () => row.style.background = '#dcfce7';
+          row.onmouseout = () => row.style.background = '#f0fdf4';
+          row.onclick = (e) => {
+            if (e.target.tagName !== 'BUTTON' && e.target.closest('button') === null) {
+              viewCompletedAppointmentDetails(appt);
+            }
+          };
+        }
+        
+        row.innerHTML = `
+          <td>${dateStr}</td>
+          <td>${appt.time || '-'}</td>
+          <td><strong>${escapeHtml(clientName)}</strong></td>
+          <td>${escapeHtml(appt.service) || '-'}</td>
+          <td>${(appt.duration || 60)} min</td>
+          <td>${escapeHtml(appt.staff) || '-'}</td>
+          <td>
+            <div style="display:flex;gap:5px;flex-wrap:wrap;">
+              <button class="btn btn-sm" style="background:${currentStatus === 'pending' ? '#f59e0b' : '#ede9fe'};color:${currentStatus === 'pending' ? '#fff' : '#333'};border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="event.stopPropagation();quickUpdateStatus('${appt.id}', 'pending')" title="Mark as Pending">
+                ⏱ Pending
+              </button>
+              <button class="btn btn-sm" style="background:${currentStatus === 'confirmed' ? '#3b82f6' : '#ede9fe'};color:${currentStatus === 'confirmed' ? '#fff' : '#333'};border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="event.stopPropagation();quickUpdateStatus('${appt.id}', 'confirmed')" title="Mark as Confirmed">
+                ✓ Confirmed
+              </button>
+              <button class="btn btn-sm" style="background:${currentStatus === 'completed' ? '#10b981' : '#ede9fe'};color:${currentStatus === 'completed' ? '#fff' : '#333'};border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="event.stopPropagation();quickUpdateStatus('${appt.id}', 'completed')" title="Mark as Completed">
+                ✓✓ Done
+              </button>
+              <button class="btn btn-sm" style="background:${currentStatus === 'cancelled' ? '#ef4444' : '#ede9fe'};color:${currentStatus === 'cancelled' ? '#fff' : '#333'};border:none;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'" onclick="event.stopPropagation();quickUpdateStatus('${appt.id}', 'cancelled')" title="Mark as Cancelled">
+                ✕ Cancelled
+              </button>
+            </div>
+          </td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#333;" title="${escapeHtml(appt.notes || '')}">
+            ${escapeHtml((appt.notes || '').substring(0, 30))}${(appt.notes || '').length > 30 ? '...' : ''}
+          </td>
+          <td>
+            <button class="btn btn-danger btn-sm btn-icon" onclick="event.stopPropagation();deleteAppointment('${appt.id}')" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+      
+      // Update pagination controls
+      updatePaginationControls();
+    }
+
+    // ========== UPDATE PAGINATION CONTROLS ==========
+    function updatePaginationControls() {
+      const prevBtn = document.getElementById('appt-prev-btn');
+      const nextBtn = document.getElementById('appt-next-btn');
+      const pageButtons = document.getElementById('appt-page-buttons');
+      const pageInfo = document.getElementById('appt-page-info');
+      
+      if (!prevBtn || !nextBtn) return;
+      
+      prevBtn.disabled = appointmentCurrentPage === 1;
+      nextBtn.disabled = appointmentCurrentPage === appointmentTotalPages;
+      if (prevBtn.disabled) prevBtn.style.opacity = '0.5';
+      else prevBtn.style.opacity = '1';
+      if (nextBtn.disabled) nextBtn.style.opacity = '0.5';
+      else nextBtn.style.opacity = '1';
+      
+      // Generate page buttons
+      pageButtons.innerHTML = '';
+      const maxButtons = 5;
+      let startPage = Math.max(1, appointmentCurrentPage - Math.floor(maxButtons / 2));
+      let endPage = Math.min(appointmentTotalPages, startPage + maxButtons - 1);
+      
+      if (endPage - startPage < maxButtons - 1) {
+        startPage = Math.max(1, endPage - maxButtons + 1);
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-sm';
+        btn.textContent = i;
+        btn.style.minWidth = '35px';
+        if (i === appointmentCurrentPage) {
+          btn.style.background = 'var(--primary)';
+          btn.style.color = '#fff';
+          btn.style.fontWeight = 'bold';
+        } else {
+          btn.style.background = '#ede9fe';
+          btn.style.color = '#333';
+        }
+        btn.onclick = () => goToAppointmentPage(i);
+        pageButtons.appendChild(btn);
+      }
+      
+      pageInfo.textContent = `Page ${appointmentCurrentPage} of ${appointmentTotalPages} (${allAppointments.length} total)`;
+    }
+
+    // ========== VIEW COMPLETED APPOINTMENT DETAILS ==========
+    window.viewCompletedAppointmentDetails = async function(appt) {
+      try {
+        const clientDoc = await getDoc(doc(db, "clients", appt.clientId));
+        const client = clientDoc.exists() ? clientDoc.data() : {};
+        
+        const detailsHtml = `
+          <div style="background:#f0fdf4;border:2px solid #10b981;border-radius:12px;padding:25px;margin:15px 0;">
+            <h3 style="color:#10b981;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+              <i class="fas fa-check-circle"></i> Completed Appointment Details
+            </h3>
+            
+            <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));gap:20px;">
+              <div style="background:#fff;padding:15px;border-radius:8px;border-left:4px solid #10b981;">
+                <h4 style="color:#10b981;margin-bottom:12px;"><i class="fas fa-user-circle"></i> Client</h4>
+                <p style="margin:0;"><strong>${escapeHtml(appt.clientName)}</strong></p>
+                <p style="font-size:13px;color:#666;margin-top:8px;margin-bottom:0;"><i class="fas fa-phone"></i> ${escapeHtml(client.contactNumber || 'N/A')}</p>
+              </div>
+              
+              <div style="background:#fff;padding:15px;border-radius:8px;border-left:4px solid #10b981;">
+                <h4 style="color:#10b981;margin-bottom:12px;"><i class="fas fa-calendar"></i> Appointment Date</h4>
+                <p style="margin:0;"><strong>${formatDate(new Date(appt.date))}</strong></p>
+                <p style="font-size:13px;color:#666;margin-top:8px;margin-bottom:0;">@${appt.time}</p>
+              </div>
+              
+              <div style="background:#fff;padding:15px;border-radius:8px;border-left:4px solid #10b981;">
+                <h4 style="color:#10b981;margin-bottom:12px;"><i class="fas fa-hourglass-half"></i> Duration</h4>
+                <p style="margin:0;"><strong>${appt.duration || 60} minutes</strong></p>
+              </div>
+              
+              <div style="background:#fff;padding:15px;border-radius:8px;border-left:4px solid #10b981;">
+                <h4 style="color:#10b981;margin-bottom:12px;"><i class="fas fa-spa"></i> Service</h4>
+                <p style="margin:0;"><strong>${escapeHtml(appt.service)}</strong></p>
+                <p style="font-size:13px;color:#666;margin-top:8px;margin-bottom:0;">${appt.pricingType === 'package' ? '📦 Package Deal' : '💳 Single Session'}</p>
+              </div>
+              
+              <div style="background:#fff;padding:15px;border-radius:8px;border-left:4px solid #10b981;">
+                <h4 style="color:#10b981;margin-bottom:12px;"><i class="fas fa-receipt"></i> Amount Paid</h4>
+                <p style="margin:0;font-size:20px;"><strong style="color:#10b981;">₱${Math.round(appt.price || 0).toLocaleString()}</strong></p>
+              </div>
+              
+              <div style="background:#fff;padding:15px;border-radius:8px;border-left:4px solid #10b981;">
+                <h4 style="color:#10b981;margin-bottom:12px;"><i class="fas fa-user-nurse"></i> Staff</h4>
+                <p style="margin:0;"><strong>${escapeHtml(appt.staff)}</strong></p>
+              </div>
+            </div>
+            
+            ${appt.notes ? `
+              <div style="background:#fff;padding:15px;border-radius:8px;margin-top:15px;border-left:4px solid #10b981;">
+                <h4 style="color:#10b981;margin-bottom:12px;"><i class="fas fa-sticky-note"></i> Notes</h4>
+                <p style="margin:0;color:#333;">${escapeHtml(appt.notes)}</p>
+              </div>
+            ` : ''}
+
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;">
+              <button class="btn btn-primary" onclick="printReceiptForAppointment('${appt.id}')">
+                <i class="fas fa-receipt"></i> Ready to Print Receipt
+              </button>
+            </div>
+          </div>
+        `;
+        
+        // Insert details into the page
+        const appointmentsSection = document.getElementById('appointments-page');
+        if (appointmentsSection) {
+          let detailsDiv = document.getElementById('appointment-details-view');
+          if (!detailsDiv) {
+            detailsDiv = document.createElement('div');
+            detailsDiv.id = 'appointment-details-view';
+            appointmentsSection.insertAdjacentElement('beforeend', detailsDiv);
+          }
+          detailsDiv.innerHTML = detailsHtml;
+          detailsDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+      } catch (error) {
+        console.error("View details error:", error);
+        alert('❌ Failed to load details: ' + error.message);
+      }
+    };
+
+    // ========== QUICK UPDATE STATUS ==========
+    window.quickUpdateStatus = async function(appointmentId, newStatus) {
+      try {
+        const appointmentDoc = await getDoc(doc(db, "appointments", appointmentId));
+        if (!appointmentDoc.exists()) {
+          alert('❌ Appointment not found');
+          return;
+        }
+        
+        const appointment = appointmentDoc.data();
+        const statusMessages = {
+          'pending': '⏱ Pending - Awaiting confirmation',
+          'confirmed': '✓ Confirmed - Client approved',
+          'completed': '✓✓ Completed - Session finished',
+          'cancelled': '✕ Cancelled - Appointment cancelled'
+        };
+        
+        await updateDoc(doc(db, "appointments", appointmentId), {
+          status: newStatus,
+          updatedAt: new Date()
+        });
+
+        // When appointment is marked as completed/done, record it into the client's treatment history.
+        if (newStatus === 'completed' && appointment.clientId) {
+          const clientId = appointment.clientId;
+          const clientDoc = await getDoc(doc(db, "clients", clientId));
+          const client = clientDoc.exists() ? clientDoc.data() : {};
+
+          // Avoid duplicates if the admin clicks completed multiple times.
+          const existingTreatment = await getDocs(
+            query(
+              collection(db, "clients", clientId, "treatments"),
+              where("appointmentId", "==", appointmentId)
+            )
+          );
+
+          if (existingTreatment.empty) {
+            await addDoc(collection(db, "clients", clientId, "treatments"), {
+              appointmentId,
+              date: appointment.date,
+              time: appointment.time,
+              services: appointment.service ? [appointment.service] : [],
+              medicalHistory: client.medicalHistory || '-',
+              session: appointment.pricingType === 'package' ? 'Package' : 'Session',
+              staff: appointment.staff,
+              mop: 'N/A',
+              amount: appointment.price || 0,
+              notes: appointment.notes || '',
+              createdAt: new Date(),
+              updatedAt: new Date()
+            });
+
+            // Trigger client card overview refresh (it listens to `clients` collection changes).
+            await updateDoc(doc(db, "clients", clientId), {
+              updatedAt: new Date()
+            });
+          }
+        }
+        
+        addActivity(`📅 Updated: ${appointment.clientName} - ${statusMessages[newStatus]}`);
+        
+      } catch (error) {
+        console.error("Edit appointment error:", error);
+        alert('❌ Failed to update appointment: ' + error.message);
+      }
+    };
+
+    window.deleteAppointment = async function(appointmentId) {
+      if (!confirm('⚠️ Are you sure you want to delete this appointment?')) return;
+      
+      try {
+        await deleteDoc(doc(db, "appointments", appointmentId));
+        alert('✅ Appointment deleted successfully!');
+        addActivity('Deleted an appointment');
+      } catch (error) {
+        console.error("Delete appointment error:", error);
+        alert('❌ Failed to delete appointment: ' + error.message);
+      }
+    };
+
+    // ========== HELPERS ==========
+    function getStatusClass(status) {
+      switch(status) {
+        case 'confirmed': return 'badge-success';
+        case 'pending': return 'badge-warning';
+        case 'completed': return 'badge-info';
+        case 'cancelled': return 'badge-danger';
+        default: return 'badge-warning';
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function formatDate(date) {
+      if (!date) return '-';
+      const d = date.toDate ? date.toDate() : new Date(date);
+      return d.toLocaleDateString('en-PH', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+
+    // ========== NEW: CHECK FOR DOUBLE BOOKINGS ==========
+    async function checkForDoubleBookings() {
+      const issues = [];
+      const staffAppts = {};
+      
+      // Group appointments by staff and date
+      allAppointments.forEach(appt => {
+        const key = `${appt.staff}-${appt.date}`;
+        if (!staffAppts[key]) staffAppts[key] = [];
+        staffAppts[key].push(appt);
+      });
+      
+      // Check for overlaps
+      for (const [key, appts] of Object.entries(staffAppts)) {
+        if (appts.length < 2) continue;
+        
+        for (let i = 0; i < appts.length; i++) {
+          for (let j = i + 1; j < appts.length; j++) {
+            const appt1 = appts[i];
+            const appt2 = appts[j];
+            
+            if (appt1.status === 'cancelled' || appt2.status === 'cancelled') continue;
+            
+            // Convert time to minutes for easier comparison
+            const [h1, m1] = appt1.time.split(':').map(Number);
+            const [h2, m2] = appt2.time.split(':').map(Number);
+            const time1 = h1 * 60 + m1;
+            const time2 = h2 * 60 + m2;
+            const duration1 = appt1.duration || 60;
+            const duration2 = appt2.duration || 60;
+            
+            const end1 = time1 + duration1;
+            const end2 = time2 + duration2;
+            
+            // Check for overlap
+            if ((time1 <= time2 && end1 > time2) || (time2 <= time1 && end2 > time1)) {
+              issues.push({
+                staff: appt1.staff,
+                client1: appt1.clientName,
+                client2: appt2.clientName,
+                time: appt1.time,
+                appt1Id: appt1.id,
+                appt2Id: appt2.id
+              });
+            }
+          }
+        }
+      }
+      
+      return issues;
+    }
+
+    // ========== NEW: LOAD SYSTEM HEALTH STATUS ==========
+    async function loadSystemHealth() {
+      const container = document.getElementById('system-health-container');
+      if (!container) return;
+      
+      try {
+        const doubleBookings = await checkForDoubleBookings();
+        const overduePending = allAppointments.filter(a => {
+          if (a.status !== 'pending' || !a.date) return false;
+          return new Date(a.date) < new Date() && a.date !== new Date().toISOString().split('T')[0];
+        }).length;
+        
+        const today = new Date().toISOString().split('T')[0];
+        const todayAppts = allAppointments.filter(a => a.date === today);
+        
+        let html = '';
+        
+        // Health status indicator
+        const isHealthy = doubleBookings.length === 0 && overduePending === 0;
+        const statusIcon = isHealthy ? '✅' : '⚠️';
+        const statusText = isHealthy ? 'All systems operational' : 'Issues detected';
+        
+        html += `
+          <div style="padding:12px;background:linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.05));border-radius:8px;border-left:3px solid #10b981;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div style="font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:6px;">
+                <i class="fas fa-shield-alt"></i> System Status
+              </div>
+              <p style="font-size:12px;color:var(--text-muted);margin:4px 0 0;">${statusText}</p>
+            </div>
+            <span style="font-size:20px;">${statusIcon}</span>
+          </div>
+        `;
+        
+        // Double bookings alert
+        if (doubleBookings.length > 0) {
+          html += `
+            <div style="padding:12px;background:linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.05));border-radius:8px;border-left:3px solid #f59e0b;">
+              <div style="font-weight:600;color:#b45309;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                <i class="fas fa-exclamation-circle"></i> Double-Bookings Detected
+              </div>
+              <p style="font-size:12px;color:#92400e;margin:0;"><strong>${doubleBookings.length}</strong> time conflict(s) found. Overlapping appointments detected.</p>
+            </div>
+          `;
+        }
+        
+        // Overdue pending alert
+        if (overduePending > 0) {
+          html += `
+            <div style="padding:12px;background:linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));border-radius:8px;border-left:3px solid #ef4444;">
+              <div style="font-weight:600;color:#7f1d1d;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                <i class="fas fa-clock"></i> Action Required
+              </div>
+              <p style="font-size:12px;color:#991b1b;margin:0;"><strong>${overduePending}</strong> past appointment(s) still pending. Update their status.</p>
+            </div>
+          `;
+        }
+        
+        // Today's overview
+        html += `
+          <div style="padding:12px;background:linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.05));border-radius:8px;border-left:3px solid #3b82f6;">
+            <div style="font-weight:600;color:#1e40af;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+              <i class="fas fa-calendar-day"></i> Today's Activity
+            </div>
+            <p style="font-size:12px;color:#1e3a8a;margin:0;"><strong>${todayAppts.length}</strong> appointment(s) scheduled for today</p>
+          </div>
+        `;
+        
+        container.innerHTML = html;
+      } catch (error) {
+        console.error("System health check error:", error);
+      }
+    }
+
+    // ========== AUTO-REFRESH SYSTEM HEALTH PERIODICALLY ==========
+    setInterval(() => {
+      if (document.getElementById('dashboard-page')?.classList.contains('active')) {
+        loadSystemHealth();
+      }
+    }, 30000); // Check every 30 seconds when on dashboard
+
+    console.log("🎉 Enhanced dashboard v2.2 with System Principles & Smart Features ready!");
+  </script>
+</body>
+</html>
+

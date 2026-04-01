@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Cath Aesthetics</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: linear-gradient(135deg, #edd4da 0%, #f5e6e8 50%, #e8c4d0 100%);
+      overflow: hidden;
+    }
+    
+    /* ========== LEFT SIDE STYLES ========== */
+    .left-section { 
+      width: 50%; 
+      height: 100vh; 
+      position: relative; 
+      overflow: hidden; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      background: linear-gradient(135deg, #f5e6e8 0%, #edd4da 100%); 
+    }
+    .left-section-image { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background-size: cover; 
+      background-position: center; 
+      background-repeat: no-repeat; 
+      z-index: 0; 
+      transition: transform 0.8s ease; 
+    }
+    .left-section:hover .left-section-image { transform: scale(1.03); }
+    .left-overlay { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: linear-gradient(135deg, rgba(237,212,218,0.92) 0%, rgba(232,196,208,0.88) 30%, rgba(212,165,181,0.85) 70%, rgba(184,149,158,0.9) 100%); 
+      z-index: 1; 
+    }
+    .fashion-decoration { position: absolute; z-index: 2; opacity: 0.6; }
+    .fashion-decoration.top-left { 
+      top: 40px; left: 40px; width: 80px; height: 80px; 
+      border-top: 2px solid rgba(255,255,255,0.8); 
+      border-left: 2px solid rgba(255,255,255,0.8); 
+      border-radius: 4px 0 0 0; 
+      animation: fadeIn 1.5s ease; 
+    }
+    .fashion-decoration.bottom-right { 
+      bottom: 40px; right: 40px; width: 80px; height: 80px; 
+      border-bottom: 2px solid rgba(255,255,255,0.8); 
+      border-right: 2px solid rgba(255,255,255,0.8); 
+      border-radius: 0 0 4px 0; 
+      animation: fadeIn 1.5s ease 0.3s backwards; 
+    }
+    .fashion-line { position: absolute; background: rgba(255,255,255,0.4); z-index: 2; }
+    .fashion-line.vertical { width: 1px; height: 60%; left: 20%; top: 20%; animation: slideDown 2s ease; }
+    .fashion-line.horizontal { height: 1px; width: 40%; left: 30%; top: 70%; animation: slideRight 2s ease 0.5s backwards; }
+    .sparkle { 
+      position: absolute; 
+      font-size: 24px; 
+      color: rgba(255,255,255,0.9); 
+      z-index: 3; 
+      animation: sparkleFloat 3s ease-in-out infinite; 
+      text-shadow: 0 0 10px rgba(255,255,255,0.6); 
+    }
+    .sparkle-1 { top: 15%; left: 15%; animation-delay: 0s; font-size: 20px; }
+    .sparkle-2 { top: 70%; left: 25%; animation-delay: 1s; font-size: 28px; }
+    .sparkle-3 { top: 35%; left: 80%; animation-delay: 2s; font-size: 22px; }
+    @keyframes sparkleFloat { 
+      0%,100% { opacity:0.7; transform:translateY(0) scale(1); } 
+      50% { opacity:1; transform:translateY(-10px) scale(1.2); } 
+    }
+    .left-content { 
+      position: relative; 
+      z-index: 4; 
+      text-align: center; 
+      color: white; 
+      padding: 40px; 
+      max-width: 450px; 
+    }
+    .logo-mark { margin-bottom: 25px; display: inline-block; }
+    .logo-svg { width: 70px; height: 70px; animation: rotateSlow 20s linear infinite; }
+    .logo-path { stroke-dasharray: 300; stroke-dashoffset: 300; animation: drawPath 2s ease forwards 0.5s; }
+    @keyframes rotateSlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes drawPath { to { stroke-dashoffset: 0; } }
+    .brand-text { margin-bottom: 25px; }
+    .brand-label { 
+      display: block; 
+      font-size: 11px; 
+      font-weight: 600; 
+      letter-spacing: 4px; 
+      text-transform: uppercase; 
+      color: rgba(255,255,255,0.85); 
+      margin-bottom: 15px; 
+      position: relative; 
+      padding-left: 20px; 
+    }
+    .brand-label::before { 
+      content: ''; 
+      position: absolute; 
+      left: 0; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      width: 12px; 
+      height: 2px; 
+      background: white; 
+    }
+    .brand-title { 
+      font-family: 'Playfair Display', serif; 
+      font-size: 52px; 
+      font-weight: 700; 
+      line-height: 1.1; 
+      margin: 0; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+      flex-wrap: wrap; 
+    }
+    .title-line { 
+      background: linear-gradient(135deg, #fff 0%, #f5e6e8 100%); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      background-clip: text; 
+    }
+    .title-divider { color: rgba(255,255,255,0.7); font-size: 24px; animation: pulse 2s ease-in-out infinite; }
+    .brand-tagline { 
+      font-size: 15px; 
+      font-weight: 300; 
+      letter-spacing: 5px; 
+      text-transform: uppercase; 
+      color: rgba(255,255,255,0.9); 
+      margin-top: 12px; 
+      opacity: 0; 
+      animation: fadeInUp 1s ease 0.8s forwards; 
+    }
+    .elegant-divider { 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 15px; 
+      margin: 30px 0; 
+      opacity: 0; 
+      animation: fadeIn 1s ease 1s forwards; 
+    }
+    .divider-dot { width: 6px; height: 6px; background: white; border-radius: 50%; box-shadow: 0 0 15px rgba(255,255,255,0.6); }
+    .divider-line { width: 60px; height: 1px; background: linear-gradient(90deg, transparent, white, transparent); }
+    .fashion-quote { 
+      font-family: 'Playfair Display', serif; 
+      font-style: italic; 
+      font-size: 18px; 
+      line-height: 1.6; 
+      color: rgba(255,255,255,0.95); 
+      margin: 25px 0 0; 
+      padding: 0 10px; 
+      opacity: 0; 
+      animation: fadeInUp 1s ease 1.2s forwards; 
+      position: relative; 
+    }
+    .fashion-quote::before, .fashion-quote::after { 
+      content: '"'; 
+      font-size: 40px; 
+      color: rgba(255,255,255,0.4); 
+      position: absolute; 
+      line-height: 1; 
+    }
+    .fashion-quote::before { top: -15px; left: -10px; }
+    .fashion-quote::after { bottom: -35px; right: -10px; transform: rotate(180deg); }
+    .fashion-quote cite { 
+      display: block; 
+      font-size: 13px; 
+      font-style: normal; 
+      letter-spacing: 2px; 
+      text-transform: uppercase; 
+      color: rgba(255,255,255,0.7); 
+      margin-top: 12px; 
+      font-family: 'Poppins', sans-serif; 
+    }
+    .bottom-brand-strip { 
+      position: absolute; 
+      bottom: 30px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      display: flex; 
+      align-items: center; 
+      gap: 20px; 
+      z-index: 4; 
+      padding: 10px 25px; 
+      background: rgba(255,255,255,0.15); 
+      border-radius: 30px; 
+      backdrop-filter: blur(10px); 
+      border: 1px solid rgba(255,255,255,0.3); 
+    }
+    .strip-text { font-size: 11px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: white; }
+    .strip-dots { display: flex; gap: 8px; }
+    .dot { 
+      width: 6px; 
+      height: 6px; 
+      background: white; 
+      border-radius: 50%; 
+      animation: dotPulse 2s ease-in-out infinite; 
+    }
+    .dot:nth-child(2) { animation-delay: 0.3s; }
+    .dot:nth-child(3) { animation-delay: 0.6s; }
+    @keyframes dotPulse { 0%,100% { opacity:0.5; transform:scale(1); } 50% { opacity:1; transform:scale(1.3); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideDown { from { opacity:0; transform:translateY(-30px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideRight { from { opacity:0; transform:translateX(-30px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes pulse { 0%,100% { opacity:0.7; transform:scale(1); } 50% { opacity:1; transform:scale(1.1); } }
+    
+    @media (max-width:1024px) { 
+      .brand-title { font-size: 42px; } 
+      .fashion-quote { font-size: 16px; } 
+    }
+    @media (max-width:768px) { 
+      .left-section { width: 100%; height: 45vh; } 
+      .brand-title { font-size: 36px; } 
+      .brand-tagline { font-size: 13px; letter-spacing: 3px; } 
+      .fashion-quote { font-size: 15px; padding: 0; } 
+      .fashion-quote::before, .fashion-quote::after { display: none; } 
+      .bottom-brand-strip { bottom: 15px; padding: 8px 20px; } 
+      .strip-text { font-size: 10px; } 
+      .fashion-decoration, .fashion-line { display: none; } 
+    }
+    
+    /* ========== RIGHT SIDE - LOGIN FORM ========== */
+    .right-section { 
+      width: 50%; 
+      height: 100vh; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      background: rgba(255,255,255,0.97); 
+      position: relative; 
+    }
+    .login-container { 
+      width: 100%; 
+      max-width: 550px; 
+      padding: 60px 50px; 
+      animation: slideLeft 0.6s ease-out; 
+    }
+    @keyframes slideLeft { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
+    .logo { text-align: center; margin-bottom: 40px; }
+    .logo h1 { 
+      font-family: 'Great Vibes', cursive; 
+      font-size: 72px; 
+      font-weight: 400; 
+      background: linear-gradient(135deg, #d4a5b5 0%, #e8c4d0 50%, #d4a5b5 100%); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      background-clip: text; 
+      margin-bottom: 10px; 
+      letter-spacing: 2px; 
+      line-height: 1.2; 
+    }
+    .logo p { color: #b8959e; font-size: 14px; font-weight: 400; letter-spacing: 4px; text-transform: uppercase; }
+    .divider-line { width: 100px; height: 3px; background: linear-gradient(90deg, transparent, #edd4da, transparent); margin: 20px auto; border-radius: 2px; }
+    .form-group { margin-bottom: 25px; position: relative; }
+    .form-group label { display: block; margin-bottom: 10px; color: #b8959e; font-weight: 500; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+    .input-wrapper { position: relative; }
+    .input-icon { 
+      position: absolute; 
+      left: 20px; 
+      top: 50%; 
+      transform: translateY(-50%); 
+      font-size: 20px; 
+      color: #d4a5b5; 
+      transition: all 0.3s ease; 
+    }
+    .form-group input { 
+      width: 100%; 
+      padding: 18px 20px 18px 55px; 
+      border: 2px solid #f0d5dc; 
+      border-radius: 16px; 
+      font-size: 16px; 
+      font-family: 'Poppins', sans-serif; 
+      transition: all 0.3s ease; 
+      background: #faf8f9; 
+      color: #8b7d82; 
+    }
+    .form-group input:focus { 
+      outline: none; 
+      border-color: #edd4da; 
+      background: white; 
+      box-shadow: 0 0 0 6px rgba(237,212,218,0.25), 0 6px 25px rgba(237,212,218,0.4); 
+    }
+    .input-wrapper:focus-within .input-icon { color: #d4a5b5; transform: translateY(-50%) scale(1.1); }
+    .form-group input::placeholder { color: #c9b5bc; }
+    
+    /* Password Toggle */
+    .toggle-password {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%); background: none; border: none;
+      cursor: pointer; padding: 5px; display: flex;
+      align-items: center; justify-content: center; z-index: 5;
+      transition: all 0.2s ease; opacity: 0.7;
+    }
+    .toggle-password:hover { opacity: 1; transform: translateY(-50%) scale(1.1); }
+    .toggle-password:active { transform: translateY(-50%) scale(0.95); }
+    .eye-icon { font-size: 18px; line-height: 1; transition: all 0.2s ease; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1)); }
+    .toggle-password:hover .eye-icon { filter: drop-shadow(0 2px 4px rgba(237, 212, 218, 0.5)); }
+    .input-wrapper input[type="password"], .input-wrapper input[type="text"] { padding-right: 50px; }
+    
+    /* Forgot Password Link */
+    .forgot-password { text-align: right; margin-bottom: 20px; }
+    .forgot-password a { color: #b8959e; font-size: 13px; text-decoration: none; transition: color 0.3s ease; cursor: pointer; }
+    .forgot-password a:hover { color: #d4a5b5; }
+    
+    /* Login Button */
+    .login-btn { 
+      width: 100%; padding: 18px; 
+      background: linear-gradient(135deg, #edd4da 0%, #e8c4d0 50%, #f0d5dc 100%); 
+      color: #8b5d6b; border: none; border-radius: 16px; 
+      font-size: 17px; font-weight: 600; font-family: 'Poppins', sans-serif; 
+      letter-spacing: 2px; cursor: pointer; transition: all 0.4s ease; 
+      margin-top: 10px; position: relative; overflow: hidden; text-transform: uppercase; 
+    }
+    .login-btn::before { 
+      content: ''; position: absolute; top: 0; left: -100%; 
+      width: 100%; height: 100%; 
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent); 
+      transition: left 0.6s ease; 
+    }
+    .login-btn:hover::before { left: 100%; }
+    .login-btn:hover { 
+      transform: translateY(-4px); 
+      box-shadow: 0 12px 35px rgba(237,212,218,0.6); 
+      background: linear-gradient(135deg, #f0d5dc 0%, #edd4da 50%, #e8c4d0 100%); 
+    }
+    .login-btn:active { transform: translateY(-2px); }
+    .login-btn:disabled { 
+      background: #f0d5dc; color: #c9b5bc; 
+      cursor: not-allowed; transform: none; box-shadow: none; 
+    }
+    
+    /* Status Messages */
+    .status-message { 
+      padding: 16px 20px; border-radius: 14px; margin-top: 25px; 
+      font-size: 14px; text-align: center; display: none; animation: fadeIn 0.3s ease; 
+    }
+    .status-message.error { 
+      background: linear-gradient(135deg, #ffe5e5, #fff0f0); 
+      color: #c75d5d; border: 1px solid #ffc9c9; display: block; 
+    }
+    .status-message.success { 
+      background: linear-gradient(135deg, #e5ffe5, #f0fff0); 
+      color: #5dc75d; border: 1px solid #c9ffc9; display: block; 
+    }
+    .status-message.loading { 
+      background: linear-gradient(135deg, #e5f0ff, #f0f5ff); 
+      color: #5d8cc7; border: 1px solid #c9d9ff; display: block; 
+    }
+    
+    /* Divider */
+    .divider { margin: 35px 0; text-align: center; position: relative; }
+    .divider::before { 
+      content: ''; position: absolute; left: 0; top: 50%; 
+      width: 100%; height: 1px; 
+      background: linear-gradient(90deg, transparent, #f0d5dc, transparent); 
+    }
+    .divider span { 
+      background: rgba(255,255,255,0.97); padding: 0 25px; 
+      position: relative; color: #b8959e; font-size: 12px; 
+      letter-spacing: 3px; text-transform: uppercase; 
+    }
+    
+    /* Footer */
+    .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #b8959e; line-height: 1.8; }
+    .footer a { color: #d4a5b5; text-decoration: none; font-weight: 500; }
+    .footer a:hover { text-decoration: underline; }
+    
+    /* Decorative Elements */
+    .corner-accent { 
+      position: absolute; width: 150px; height: 150px; 
+      border: 2px solid #f0d5dc; border-radius: 20px; 
+    }
+    .corner-top-right { top: 30px; right: 30px; border-left: none; border-bottom: none; }
+    .corner-bottom-left { bottom: 30px; left: 30px; border-right: none; border-top: none; }
+    .particle { 
+      position: absolute; width: 10px; height: 10px; 
+      background: rgba(237,212,218,0.6); border-radius: 50%; 
+      animation: particleFloat 15s infinite; 
+    }
+    .particle:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+    .particle:nth-child(2) { top: 20%; left: 80%; animation-delay: 3s; }
+    .particle:nth-child(3) { top: 60%; left: 20%; animation-delay: 6s; }
+    .particle:nth-child(4) { top: 80%; left: 70%; animation-delay: 9s; }
+    .particle:nth-child(5) { top: 40%; left: 90%; animation-delay: 12s; }
+    @keyframes particleFloat { 
+      0%,100% { transform:translate(0,0) scale(1); opacity:0.6; } 
+      50% { transform:translate(20px,-30px) scale(1.2); opacity:1; } 
+    }
+    
+    @media (max-width:1024px) { 
+      .left-section { width: 40%; } 
+      .right-section { width: 60%; } 
+      .logo h1 { font-size: 56px; } 
+    }
+    @media (max-width:768px) { 
+      body { flex-direction: column; } 
+      .left-section { width: 100%; height: 40vh; } 
+      .right-section { width: 100%; height: 60vh; overflow-y: auto; } 
+      .login-container { padding: 40px 25px; max-width: 100%; } 
+      .logo h1 { font-size: 48px; } 
+      .corner-accent { display: none; } 
+    }
+    @media (max-width:480px) { 
+      .logo h1 { font-size: 40px; } 
+      .form-group input { padding: 16px 16px 16px 50px; font-size: 15px; } 
+      .login-btn { font-size: 15px; padding: 16px; } 
+    }
+    
+    /* ========== FORGOT PASSWORD MODAL ========== */
+    .modal-overlay { 
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(184,149,158,0.7); backdrop-filter: blur(8px); 
+      display: flex; align-items: center; justify-content: center; 
+      z-index: 9999; animation: fadeIn 0.3s ease; padding: 20px; 
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-content { 
+      background: white; border-radius: 20px; padding: 35px 30px; 
+      width: 100%; max-width: 420px; position: relative; 
+      box-shadow: 0 25px 80px rgba(237,212,218,0.5); 
+      animation: slideUp 0.4s ease; text-align: center; 
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
+    .modal-close { 
+      position: absolute; top: 15px; right: 20px; 
+      background: none; border: none; font-size: 28px; 
+      color: #b8959e; cursor: pointer; transition: color 0.3s ease; line-height: 1; 
+    }
+    .modal-close:hover { color: #d4a5b5; }
+    .modal-icon { 
+      font-size: 48px; margin-bottom: 15px; display: inline-block; 
+      animation: bounce 2s ease infinite; 
+    }
+    @keyframes bounce { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-10px); } }
+    .modal-content h3 { 
+      font-family: 'Playfair Display', serif; color: #8b5d6b; 
+      font-size: 24px; margin-bottom: 10px; 
+    }
+    .modal-description { color: #8b7d82; font-size: 14px; line-height: 1.6; margin-bottom: 25px; }
+    .modal-content .form-group { margin-bottom: 20px; text-align: left; }
+    .modal-content .input-wrapper { position: relative; }
+    .modal-content .input-icon { 
+      position: absolute; left: 16px; top: 50%; 
+      transform: translateY(-50%); font-size: 18px; color: #d4a5b5; 
+    }
+    .modal-content input { 
+      width: 100%; padding: 14px 16px 14px 48px; 
+      border: 2px solid #f0d5dc; border-radius: 12px; 
+      font-size: 15px; font-family: 'Poppins', sans-serif; 
+      transition: all 0.3s ease; background: #faf8f9; 
+    }
+    .modal-content input:focus { 
+      outline: none; border-color: #edd4da; background: white; 
+      box-shadow: 0 0 0 4px rgba(237,212,218,0.25); 
+    }
+    .modal-content .login-btn { width: 100%; padding: 14px; margin-top: 5px; font-size: 15px; }
+    .modal-hint { margin-top: 20px; color: #b8959e; font-size: 12px; }
+    .modal-content .status-message { margin-top: 15px; font-size: 13px; padding: 10px 15px; }
+  </style>
+</head>
+<body>
+
+  <!-- ========== LEFT SIDE ========== -->
+  <div class="left-section">
+    <div class="left-section-image" style="background-image: url('sources/spider-gwen-night-city-marvel-4k-wallpaper-uhdpaper.com-292@5@j.jpg');"></div>
+    <div class="left-overlay"></div>
+    <div class="fashion-decoration top-left"></div>
+    <div class="fashion-decoration bottom-right"></div>
+    <div class="fashion-line vertical"></div>
+    <div class="fashion-line horizontal"></div>
+    <div class="sparkle sparkle-1">✦</div>
+    <div class="sparkle sparkle-2">✦</div>
+    <div class="sparkle sparkle-3">✦</div>
+    <div class="left-content">
+      <div class="logo-mark">
+        <svg viewBox="0 0 100 100" class="logo-svg">
+          <defs><linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#edd4da"/><stop offset="100%" style="stop-color:#d4a5b5"/></linearGradient></defs>
+          <path d="M50 10 L65 35 L95 40 L75 60 L80 90 L50 75 L20 90 L25 60 L5 40 L35 35 Z" fill="none" stroke="url(#logoGrad)" stroke-width="2" class="logo-path"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-label">EST. 2026</span>
+        <h2 class="brand-title"><span class="title-line">Cath</span><span class="title-divider">✦</span><span class="title-line">Aesthetics</span></h2>
+        <p class="brand-tagline">Curated Beauty • Modern Wellness</p>
+      </div>
+      <div class="elegant-divider"><span class="divider-dot"></span><span class="divider-line"></span><span class="divider-dot"></span></div>
+      <blockquote class="fashion-quote"><p>"Elegance is the only beauty that never fades."</p><cite>— Audrey Hepburn</cite></blockquote>
+    </div>
+    <div class="bottom-brand-strip"><span class="strip-text">LUCENA CITY • QUEZON</span><div class="strip-dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+  </div>
+
+  <!-- ========== RIGHT SIDE - LOGIN FORM ========== -->
+  <div class="right-section">
+    <div class="login-container">
+      <div class="corner-accent corner-top-right"></div>
+      <div class="corner-accent corner-bottom-left"></div>
+      <div class="logo">
+        <h1>Cath Aesthetics</h1>
+        <div class="divider-line"></div>
+        <p>Login Portal</p>
+      </div>
+
+      <form id="login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="email" placeholder="your@email.com" required autocomplete="off">
+            <span class="input-icon">📧</span>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="password" placeholder="Password" required autocomplete="new-password">
+            <span class="input-icon lock-icon">🔒</span>
+            <button type="button" class="toggle-password" id="toggle-password" title="Show/Hide password">
+              <span class="eye-icon">👁️</span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="forgot-password">
+          <a id="forgot-password-link">Forgot Password?</a>
+        </div>
+        
+        <button type="submit" class="login-btn" id="login-btn">✨ Sign In</button>
+      </form>
+      
+      <div id="status-message" class="status-message"></div>
+      <div class="divider"><span>Quick Access</span></div>
+      
+      <div class="footer">
+        <p>© 2026 Cath Aesthetics • All Rights Reserved</p>
+        <p>Secure Login Portal 🔐</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ FORGOT PASSWORD MODAL -->
+  <div id="forgot-modal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <div class="modal-icon">🔑</div>
+      <h3>Reset Password</h3>
+      <p class="modal-description">Enter your email address and we'll send you a link to reset your password.</p>
+      <form id="forgot-form">
+        <div class="form-group">
+          <label for="forgot-email">Email Address</label>
+          <div class="input-wrapper">
+            <input type="email" id="forgot-email" placeholder="your@email.com" required autocomplete="email">
+            <span class="input-icon">📧</span>
+          </div>
+        </div>
+        <button type="submit" class="login-btn" id="forgot-btn">✉️ Send Reset Link</button>
+      </form>
+      <div id="forgot-status" class="status-message"></div>
+      <p class="modal-hint"><small>Check your spam folder if you don't see the email.</small></p>
+    </div>
+  </div>
+
+  <!-- ✅ MAIN SCRIPT WITH SESSION PERSISTENCE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged, 
+      signInWithEmailAndPassword, 
+      sendPasswordResetEmail,
+      setPersistence,
+      browserSessionPersistence  // ✅ Correct name for Firebase v10+
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC-uy3DLim-C06ueatkNCr9bZ-4Cnqi5E4",
+      authDomain: "cath-aesthetics.firebaseapp.com",
+      projectId: "cath-aesthetics",
+      storageBucket: "cath-aesthetics.firebasestorage.app",
+      messagingSenderId: 89600382,
+      appId: "1:89600382:web:4b9259e721980ca266c32f",
+      measurementId: "G-V4FRRXM4BC"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    
+    // ✅ Set session persistence (clears on browser close)
+    setPersistence(auth, browserSessionPersistence)
+      .then(() => {
+        console.log("🔐 Session persistence enabled - users logout on browser close");
+      })
+      .catch((error) => {
+        console.warn("⚠️ Could not set persistence:", error);
+      });
+
+    // 🔐 SECURITY: Redirect if already logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("⚠️ Already logged in:", user.email);
+        window.location.replace("dashboard.html");
+        return;
+      }
+      console.log("✅ Showing login form");
+      initializeLoginForm();
+    });
+
+    // ========== LOGIN FORM FUNCTIONALITY ==========
+    function initializeLoginForm() {
+      const emailInput = document.getElementById('email');
+      const passwordInput = document.getElementById('password');
+      const loginForm = document.getElementById('login-form');
+      const loginBtn = document.getElementById('login-btn');
+      const statusMessage = document.getElementById('status-message');
+
+      function showStatus(message, type) {
+        if (statusMessage) {
+          statusMessage.textContent = message;
+          statusMessage.className = 'status-message ' + type;
+        }
+      }
+
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = emailInput.value;
+          const password = passwordInput.value;
+
+          if (loginBtn) {
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '⏳ Signing in...';
+          }
+          showStatus('✨ Authenticating...', 'loading');
+
+          try {
+            await signInWithEmailAndPassword(auth, email, password);
+            showStatus('🌸 Welcome back! Redirecting...', 'success');
+            setTimeout(() => {
+              window.location.replace("dashboard.html");
+            }, 1000);
+          } catch (error) {
+            console.error("Login error:", error);
+            let errorMessage = 'Login failed.';
+            if (error.code === 'auth/invalid-email') errorMessage = 'Invalid email.';
+            else if (error.code === 'auth/user-not-found') errorMessage = 'No account found.';
+            else if (error.code === 'auth/wrong-password') errorMessage = 'Wrong password.';
+            else if (error.code === 'auth/invalid-credential') errorMessage = 'Invalid credentials.';
+            showStatus('❌ ' + errorMessage, 'error');
+            if (loginBtn) {
+              loginBtn.disabled = false;
+              loginBtn.innerHTML = '✨ Sign In';
+            }
+          }
+        });
+      }
+
+      // Input focus animations
+      document.querySelectorAll('.form-group input').forEach(input => {
+        input.addEventListener('focus', function() {
+          this.parentElement.parentElement.classList.add('focused');
+        });
+        input.addEventListener('blur', function() {
+          this.parentElement.parentElement.classList.remove('focused');
+        });
+      });
+
+      // ✅ Clear form on back button
+      window.addEventListener('pageshow', (event) => {
+        if (event.persisted) {
+          console.log("🔄 Page restored from cache - clearing form");
+          if (emailInput) emailInput.value = '';
+          if (passwordInput) passwordInput.value = '';
+        }
+      });
+      window.addEventListener('load', () => {
+        console.log("🔄 Page loaded - ensuring form is clear");
+        if (emailInput) emailInput.value = '';
+        if (passwordInput) passwordInput.value = '';
+      });
+    }
+
+    // ========== PASSWORD TOGGLE ==========
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const passwordInputGlobal = document.getElementById('password');
+    if (togglePasswordBtn && passwordInputGlobal) {
+      togglePasswordBtn.addEventListener('click', () => {
+        const isPassword = passwordInputGlobal.type === 'password';
+        passwordInputGlobal.type = isPassword ? 'text' : 'password';
+        const eyeIcon = togglePasswordBtn.querySelector('.eye-icon');
+        if (eyeIcon) {
+          eyeIcon.textContent = isPassword ? '👁️‍🗨️' : '👁️';
+          eyeIcon.style.transform = 'scale(1.2)';
+          setTimeout(() => { eyeIcon.style.transform = 'scale(1)'; }, 150);
+        }
+        passwordInputGlobal.focus();
+      });
+    }
+
+    // ========== FORGOT PASSWORD ==========
+    const forgotLink = document.getElementById('forgot-password-link');
+    const forgotModal = document.getElementById('forgot-modal');
+    const modalClose = document.getElementById('modal-close');
+    const forgotForm = document.getElementById('forgot-form');
+    const forgotEmail = document.getElementById('forgot-email');
+    const forgotBtn = document.getElementById('forgot-btn');
+    const forgotStatus = document.getElementById('forgot-status');
+
+    if (forgotLink && forgotModal) {
+      forgotLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        const loginEmail = document.getElementById('email')?.value || '';
+        if (loginEmail && forgotEmail) forgotEmail.value = loginEmail;
+        forgotModal.classList.remove('hidden');
+        if (forgotEmail) forgotEmail.focus();
+      });
+    }
+
+    function closeModal() {
+      if (forgotModal) forgotModal.classList.add('hidden');
+      if (forgotForm) forgotForm.reset();
+      if (forgotStatus) { forgotStatus.style.display = 'none'; forgotStatus.textContent = ''; }
+      if (forgotBtn) { forgotBtn.disabled = false; forgotBtn.innerHTML = '✉️ Send Reset Link'; }
+    }
+    if (modalClose) modalClose.addEventListener('click', closeModal);
+    if (forgotModal) forgotModal.addEventListener('click', (e) => { if (e.target === forgotModal) closeModal(); });
+
+    if (forgotForm) {
+      forgotForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = forgotEmail?.value.trim();
+        if (!email) {
+          if (forgotStatus) {
+            forgotStatus.textContent = '❌ Please enter an email address.';
+            forgotStatus.className = 'status-message error';
+            forgotStatus.style.display = 'block';
+          }
+          return;
+        }
+        if (forgotBtn) { forgotBtn.disabled = true; forgotBtn.innerHTML = '⏳ Sending...'; }
+        if (forgotStatus) forgotStatus.style.display = 'none';
+
+        try {
+          await sendPasswordResetEmail(auth, email);
+          if (forgotStatus) {
+            forgotStatus.textContent = '✅ Reset link sent! Check your email (and spam folder).';
+            forgotStatus.className = 'status-message success';
+            forgotStatus.style.display = 'block';
+          }
+          setTimeout(() => { closeModal(); }, 3000);
+        } catch (error) {
+          console.error("💥 Password Reset ERROR:", { code: error.code, message: error.message });
+          let errorMessage = 'Failed to send reset link.';
+          switch (error.code) {
+            case 'auth/invalid-email': errorMessage = 'Please enter a valid email address.'; break;
+            case 'auth/user-not-found': errorMessage = '⚠️ No account exists with this email.'; break;
+            case 'auth/too-many-requests': errorMessage = '🕐 Too many attempts. Please wait 1 minute.'; break;
+            case 'auth/invalid-api-key': errorMessage = '⚙️ Firebase config error. Contact admin.'; break;
+            case 'auth/network-request-failed': errorMessage = '🌐 Network error. Check your connection.'; break;
+            default: errorMessage = `❌ ${error.code || 'Error'}: ${error.message}`;
+          }
+          if (forgotStatus) {
+            forgotStatus.textContent = errorMessage;
+            forgotStatus.className = 'status-message error';
+            forgotStatus.style.display = 'block';
+          }
+          if (forgotBtn) { forgotBtn.disabled = false; forgotBtn.innerHTML = '✉️ Send Reset Link'; }
+        }
+      });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && forgotModal && !forgotModal.classList.contains('hidden')) closeModal();
+    });
+  </script>
+</body>
+</html>

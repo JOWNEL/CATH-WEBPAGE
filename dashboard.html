@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting... • Cath Aesthetics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #edd4da 0%, #f5e6e8 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .loader { 
+      text-align: center; 
+      color: #8b5d6b; 
+      padding: 40px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(237, 212, 218, 0.4);
+      max-width: 400px;
+      width: 90%;
+    }
+    .loader h2 {
+      font-family: 'Great Vibes', cursive;
+      font-size: 48px;
+      margin-bottom: 15px;
+      background: linear-gradient(135deg, #d4a5b5, #e8c4d0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #f0d5dc;
+      border-top: 3px solid #edd4da;
+      border-radius: 50%;
+      margin: 0 auto 15px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loader p { color: #b8959e; font-size: 14px; }
+    .back-btn {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #f0d5dc;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      color: #8b5d6b;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .back-btn:hover { background: #e8c4d0; transform: translateY(-2px); }
+    .back-btn:active { transform: translateY(0); }
+    .error-details {
+      margin-top: 15px;
+      font-size: 11px;
+      color: #c75d5d;
+      background: #fff0f0;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: left;
+      display: none;
+    }
+    .error-details.show { display: block; }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <h2>Cath Aesthetics</h2>
+    <div class="spinner"></div>
+    <p id="status">Preparing your dashboard...</p>
+    <div id="error-details" class="error-details"></div>
+    <button id="back-btn" class="back-btn" style="display:none;">🔙 Go back to login</button>
+  </div>
+
+  <!-- ✅ ONE AND ONLY ONE Script Block -->
+  <script type="module">
+    // ✅ Import Firebase modules ONCE
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getAuth, 
+      onAuthStateChanged,
+      setPersistence,
+      browserSessionPersistence
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+      getFirestore, 
+      doc, 
+      getDoc 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyC-uy3DLim-C06ueatkNCr9bZ-4Cnqi5E4",
+      authDomain: "cath-aesthetics.firebaseapp.com",
+      projectId: "cath-aesthetics",
+      storageBucket: "cath-aesthetics.firebasestorage.app",
+      messagingSenderId: 89600382,
+      appId: "1:89600382:web:4b9259e721980ca266c32f",
+      measurementId: "G-V4FRRXM4BC"
+    };
+
+    // ✅ Initialize Firebase ONCE
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    // ✅ Set session persistence ONCE
+    setPersistence(auth, browserSessionPersistence)
+      .then(() => console.log("🔐 Session persistence enabled"))
+      .catch(e => console.warn("⚠️ Persistence warning:", e));
+
+    const statusEl = document.getElementById('status');
+    const errorDetailsEl = document.getElementById('error-details');
+    const backBtn = document.getElementById('back-btn');
+
+    // 🔐 Simple Auth Check & Redirect (WITH ESCAPE HATCH)
+    onAuthStateChanged(auth, async (user) => {
+      console.log("🔄 Router - Auth:", user ? user.email : "NOT logged in");
+
+      // ❌ Not logged in → redirect to login
+      if (!user) {
+        statusEl.textContent = "⚠️ Not logged in. Redirecting...";
+        setTimeout(() => { window.location.replace("login.html"); }, 1000);
+        return;
+      }
+
+      statusEl.textContent = "👤 Loading dashboard...";
+
+      try {
+        // 🔍 Query Firestore for user role (by UID)
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        let role = "employee"; // Default fallback
+        if (userDoc.exists()) {
+          role = userDoc.data().role || "employee";
+          console.log("📋 Found user doc, role:", role);
+        } else {
+          console.log("⚠️ No user doc found - using default role: employee");
+        }
+
+        // Redirect based on role
+        setTimeout(() => {
+          if (role === 'admin') {
+            statusEl.textContent = "👑 Redirecting to Admin Dashboard...";
+            window.location.replace("admin-dashboard.html");
+          } else {
+            statusEl.textContent = "👤 Redirecting to Employee Dashboard...";
+            window.location.replace("employee-dashboard.html");
+          }
+        }, 800);
+        
+      } catch (error) {
+        console.error("❌ Router error:", { code: error.code, message: error.message });
+        
+        // Show error details for debugging
+        errorDetailsEl.innerHTML = `<strong>Error:</strong> ${error.code}<br><strong>Message:</strong> ${error.message}`;
+        errorDetailsEl.classList.add('show');
+        backBtn.style.display = 'inline-block';
+        
+        // Show "Go back to login" button
+        backBtn.onclick = () => {
+          window.location.replace("login.html");
+        };
+        
+        statusEl.textContent = "⚠️ Issue detected. You can go back to login.";
+      }
+    });
+  </script>
+</body>
+</html>
